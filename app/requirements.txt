@@ -1,0 +1,20 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+
+sqlalchemy[asyncio]
+asyncpg
+psycopg2-binary
+alembic
+
+redis
+celery
+
+google-genai                 # Gemini official SDK
+langchain
+langchain-google-genai       # LC wrapper for Gemini (chat+embed)
+langchain-postgres           # PGVector vector store (optional helper)
+
+crewai                       # multi-agent framework
+crewai-tools                 # (optional) if you want stock tools (web, etc.)
