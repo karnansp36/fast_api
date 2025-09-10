@@ -1,9 +1,10 @@
 # tools/memory_tools.py
-from crewai_tools import BaseTool
-from services.rag import store_memory, search_memory
+from crewai.tools import BaseTool
+from app.services.rag import store_memory, search_memory
 from typing import Type, List
 from pydantic import BaseModel, Field
 import asyncio
+import json
 
 class StoreMemoryInput(BaseModel):
     """Input schema for StoreMemoryTool"""
@@ -19,6 +20,14 @@ class StoreMemoryTool(BaseTool):
     def _run(self, user_id: str, text: str, tags: List[str] = None) -> str:
         """Store memory synchronously"""
         try:
+            # Handle dictionary inputs
+            if isinstance(user_id, dict):
+                user_id = user_id.get('description', 'default')
+            if isinstance(text, dict):
+                text = text.get('description', '')
+            if tags and isinstance(tags, dict):
+                tags = tags.get('description', '').split(',') if tags.get('description') else []
+                
             # Run async function in sync context
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
@@ -41,12 +50,18 @@ class SearchMemoryTool(BaseTool):
     def _run(self, user_id: str, query: str = "") -> str:
         """Search memory synchronously"""
         try:
+            # Handle dictionary inputs
+            if isinstance(user_id, dict):
+                user_id = user_id.get('description', 'default')
+            if isinstance(query, dict):
+                query = query.get('description', '')
+                
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             memories = loop.run_until_complete(search_memory(user_id, query))
             loop.close()
             
-            if memories:
+            if memories and not memories[0].startswith("Error"):
                 return f"Found memories: {'; '.join(memories[:3])}"
             else:
                 return "No relevant memories found"

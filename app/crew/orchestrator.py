@@ -1,16 +1,17 @@
 # crew/orchestrator.py
 from crewai import Crew, Process
-from crew.agents.conversation import conversation_agent
-from crew.agents.emotion import emotion_agent
-from crew.agents.memory import memory_agent
-from crew.agents.task import task_agent
-from crew.tasks import (
+from app.crew.agents.conversation import conversation_agent
+from app.crew.agents.emotion import emotion_agent
+from app.crew.agents.memory import memory_agent
+from app.crew.agents.task import task_agent
+from app.crew.tasks import (
     create_conversation_task, 
     create_emotion_task, 
     create_memory_task, 
     create_task_management_task
 )
-import re
+import asyncio
+
 
 class CrewOrchestrator:
     def __init__(self):
@@ -59,17 +60,26 @@ class CrewOrchestrator:
                 agents=self.agents,
                 tasks=tasks,
                 process=Process.sequential,
-                verbose=True
+                verbose=True,
+                max_rpm=10,  # Add rate limiting
+                memory=True  # Enable crew memory
             )
             
-            # Run the crew
-            result = crew.kickoff()
-            
-            # Extract the final response (usually from the last task)
-            if hasattr(result, 'raw'):
-                return str(result.raw)
-            else:
-                return str(result)
+            # Run the crew with timeout
+            try:
+                result = await asyncio.wait_for(
+                    asyncio.to_thread(crew.kickoff),
+                    timeout=30.0  # 30 second timeout
+                )
+                
+                # Extract the final response
+                if hasattr(result, 'raw'):
+                    return str(result.raw)
+                else:
+                    return str(result)
+                    
+            except asyncio.TimeoutError:
+                return "I apologize, but the request took too long to process. Please try again."
                 
         except Exception as e:
             return f"I apologize, but I encountered an error processing your message: {str(e)}"

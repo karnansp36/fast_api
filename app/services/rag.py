@@ -1,11 +1,10 @@
 # services/rag.py
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from core.db import AsyncSessionLocal
-from models import Memory
-from services.embeddings import embed_text
+from app.core.db import AsyncSessionLocal
+from app.core.models import Memory
+from app.services.embeddings import embed_text
 from typing import List
-import asyncio
 
 async def store_memory(user_id: str, text_content: str, tags: List[str] = None) -> str:
     """Store user memory with embedding"""
@@ -17,7 +16,7 @@ async def store_memory(user_id: str, text_content: str, tags: List[str] = None) 
                 user_id=user_id,
                 text=text_content,
                 metadata={"tags": tags or []},
-                embedding=embedding
+                # embedding=embedding  # Uncomment if using pgvector
             )
             session.add(memory)
             await session.commit()

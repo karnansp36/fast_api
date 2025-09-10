@@ -1,14 +1,7 @@
 # crew/agents/task.py
 from crewai import Agent
-from langchain_google_genai import ChatGoogleGenerativeAI
-from config import settings
-from tools.reminder_tools import CreateReminderTool, GetRemindersTool
-
-llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
-    google_api_key=settings.GEMINI_API_KEY,
-    temperature=0.2
-) if settings.GEMINI_API_KEY else None
+from app.tools.reminder_tools import CreateReminderTool, GetRemindersTool
+from app.crew.llm_config import default_llm
 
 task_agent = Agent(
     role="Task Manager",
@@ -17,7 +10,7 @@ task_agent = Agent(
     set reminders, and manage their schedule. You can create new tasks and retrieve 
     existing ones to help users stay organized.""",
     tools=[CreateReminderTool(), GetRemindersTool()],
-    llm=llm,
+    llm=default_llm,
     verbose=True,
     max_iter=3
 )
