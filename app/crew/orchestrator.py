@@ -69,7 +69,7 @@ class CrewOrchestrator:
             try:
                 result = await asyncio.wait_for(
                     asyncio.to_thread(crew.kickoff),
-                    timeout=30.0  # 30 second timeout
+                    timeout=180  # 180 second timeout
                 )
                 
                 # Extract the final response
