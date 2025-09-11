@@ -5,10 +5,12 @@ from app.crew.agents.emotion import emotion_agent
 from app.crew.agents.memory import memory_agent
 from app.crew.agents.task import task_agent
 
-def create_conversation_task(message: str, user_id: str) -> Task:
+def create_conversation_task(message: str, user_id: str, context: dict = None) -> Task:
     return Task(
         description=f"""
         Analyze the user message: "{message}" from user {user_id}.
+        
+        Context available: {context}
         
         IMPORTANT: You are the main coordinator. Use the Ask question to coworker tool to 
         get information from other agents, but provide the final response yourself.
@@ -19,13 +21,13 @@ def create_conversation_task(message: str, user_id: str) -> Task:
         3. If the user seems emotional, get context from emotion agent
         4. Provide a natural, helpful response based on the user's needs
         
+        Use the provided context to give personalized responses when possible.
         Always maintain conversation context and be helpful and friendly.
         DO NOT use the "Delegate work to coworker" tool - use "Ask question to coworker" instead.
         """,
         agent=conversation_agent,
         expected_output="A natural conversational response that addresses the user's needs"
     )
-
 def create_emotion_task(message: str) -> Task:
     return Task(
         description=f"""

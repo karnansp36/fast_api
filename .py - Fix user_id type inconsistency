@@ -1,0 +1,13 @@
+                                       Table "public.memories"
+   Column   |           Type           | Collation | Nullable |               Default                
+------------+--------------------------+-----------+----------+--------------------------------------
+ id         | integer                  |           | not null | nextval('memories_id_seq'::regclass)
+ user_id    | uuid                     |           | not null | 
+ text       | text                     |           | not null | 
+ meta_data  | json                     |           |          | 
+ created_at | timestamp with time zone |           |          | now()
+ embedding  | vector(1536)             |           |          | 
+Indexes:
+    "memories_pkey" PRIMARY KEY, btree (id)
+    "ix_memories_id" btree (id)
+

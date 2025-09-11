@@ -1,15 +1,23 @@
-# crew/agents/conversation.py
+# agents/conversation.py - FIXED VERSION
 from crewai import Agent
 from app.crew.llm_config import default_llm
+import logging
 
-conversation_agent = Agent(
-    role="Conversation Manager",
-    goal="Understand user input and generate natural, helpful responses while coordinating with other agents",
-    backstory="""You are a friendly personal assistant that can remember conversations, 
-    detect emotions, and help with tasks. You coordinate with other specialized agents 
-    to provide comprehensive assistance.""",
-    llm=default_llm,
-    verbose=True,
-    allow_delegation=True,
-    max_iter=3
-)
+logger = logging.getLogger(__name__)
+
+try:
+    conversation_agent = Agent(
+        role="Conversation Manager",
+        goal="Provide helpful and natural responses to user messages",
+        backstory="""You are a friendly conversation manager. When users ask questions,
+        provide direct, helpful answers. Don't mention using tools or asking coworkers - 
+        just give natural responses.""",
+        llm=default_llm,
+        verbose=False,  # Reduce verbose output
+        allow_delegation=False,  # Disable delegation to prevent tool confusion
+        max_iter=2,  # Limit iterations
+        max_execution_time=30  # 30 second timeout
+    )
+except Exception as e:
+    logger.error(f"Failed to create conversation agent: {e}")
+    conversation_agent = None

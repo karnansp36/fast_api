@@ -6,6 +6,7 @@ from typing import Dict
 import asyncio
 import logging
 import time
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,8 @@ async def process_message_with_timeout(websocket, user_id, message, start_time):
         end_time = time.time()
         processing_time = end_time - start_time
         logger.error(f"Error processing message for user {user_id}: {str(e)}")
-        
+        logger.error(f"Full traceback: {traceback.format_exc()}")  # ADD THIS LINE
+
         if user_id in manager.active_connections:
             await websocket.send_json({
                 "reply": f"Sorry, I encountered an error: {str(e)}",
