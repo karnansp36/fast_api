@@ -1,13 +1,74 @@
-# tools/memory_tools.py - FIXED VERSION
+# tools/memory_tools.py - FIXED VERSION (No Mem0)
 from crewai.tools import BaseTool
 from typing import Type, List
 from pydantic import BaseModel, Field
 import asyncio
 import json
-from app.services.memory_service import memory_service
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Import your custom memory service instead of mem0
+from typing import Dict, Any, Optional
+from datetime import datetime
+
+class SimpleMemoryService:
+    """Simple in-memory fallback service to avoid Mem0 issues"""
+    def __init__(self):
+        self.memories = {}
+    
+    async def store_memory(self, user_id: str, memory_type: str, content: Dict[str, Any], meta_data: Dict[str, Any] = None) -> str:
+        try:
+            if user_id not in self.memories:
+                self.memories[user_id] = []
+            
+            memory_entry = {
+                "text": content.get("text", str(content)),
+                "type": memory_type,
+                "content": content,
+                "meta_data": meta_data or {},
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            self.memories[user_id].append(memory_entry)
+            logger.info(f"Stored memory for user {user_id}")
+            return f"Memory stored successfully: {memory_entry['text'][:50]}..."
+            
+        except Exception as e:
+            logger.error(f"Error storing memory: {e}")
+            return f"Error storing memory: {str(e)}"
+    
+    async def search_memories(self, user_id: str, memory_type: Optional[str] = None, query: str = "", limit: int = 5) -> List[Dict[str, Any]]:
+        try:
+            if user_id not in self.memories:
+                return []
+            
+            user_memories = self.memories[user_id]
+            
+            # Filter by type if specified
+            if memory_type:
+                user_memories = [mem for mem in user_memories if mem.get("type") == memory_type]
+            
+            # Search by query if provided
+            if query:
+                query_lower = query.lower()
+                filtered = []
+                for mem in user_memories:
+                    text = mem.get("text", "").lower()
+                    if query_lower in text:
+                        filtered.append(mem)
+                user_memories = filtered
+            
+            # Return recent first, limited
+            sorted_memories = sorted(user_memories, key=lambda x: x.get("timestamp", ""), reverse=True)
+            return sorted_memories[:limit]
+            
+        except Exception as e:
+            logger.error(f"Error searching memories: {e}")
+            return []
+
+# Use simple memory service to avoid Mem0 issues
+simple_memory_service = SimpleMemoryService()
 
 class StoreMemoryInput(BaseModel):
     """Input schema for StoreMemoryTool"""
@@ -49,9 +110,9 @@ class StoreMemoryTool(BaseTool):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # Store memory
+            # Store memory using simple service (no Mem0)
             result = loop.run_until_complete(
-                memory_service.store_memory(
+                simple_memory_service.store_memory(
                     user_id, 
                     "user_memory", 
                     {"text": text, "tags": tags},
@@ -59,7 +120,7 @@ class StoreMemoryTool(BaseTool):
                 )
             )
             
-            return f"Successfully stored: {text[:50]}..."
+            return result
             
         except Exception as e:
             error_msg = f"Failed to store memory: {str(e)}"
@@ -98,7 +159,7 @@ class SearchMemoryTool(BaseTool):
                 asyncio.set_event_loop(loop)
                 
             memories = loop.run_until_complete(
-                memory_service.search_memories(user_id, "user_memory", query, 3)
+                simple_memory_service.search_memories(user_id, "user_memory", query, 3)
             )
             
             if memories:

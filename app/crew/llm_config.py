@@ -16,7 +16,7 @@ def get_llm(temperature=0.7, max_retries=3):
             
             if settings.GEMINI_API_KEY:
                 return LLM(
-                    model="gemini/gemini-1.5-flash",  # Use stable version
+                    model="gemini/gemini-2.0-flash",  # Use stable version
                     api_key=settings.GEMINI_API_KEY,
                     temperature=temperature,
                     max_retries=2,
