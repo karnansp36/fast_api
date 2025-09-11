@@ -4,7 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.db import engine
 from app.core.models import Base
-import websocket
+from app.websocket import router
+import uvicorn
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -50,5 +51,4 @@ async def root():
     }
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

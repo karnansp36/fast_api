@@ -1,9 +1,9 @@
 # services/rag.py
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from core.db import AsyncSessionLocal
-from models import Memory
-from services.embeddings import embed_text
+from app.core.db import AsyncSessionLocal
+from app.core.models import Memory
+from app.services.embeddings import embed_text
 from typing import List
 import asyncio
 
