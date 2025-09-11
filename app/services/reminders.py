@@ -1,7 +1,6 @@
 # services/reminders.py
 from datetime import datetime
 from typing import Dict, Any, List
-import asyncio
 
 # Simple in-memory storage for demo
 reminders_store = {}

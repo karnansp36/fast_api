@@ -4,8 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.core.db import engine
 from app.core.models import Base
-from app.websocket import router
-import uvicorn
+from app.api.websocket_routes import router as websocket_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -39,7 +38,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(websocket.router, prefix="/api/v1")
+app.include_router(websocket_router, prefix="/api/v1")
 
 @app.get("/")
 async def root():

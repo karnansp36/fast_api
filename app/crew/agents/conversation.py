@@ -1,14 +1,6 @@
 # crew/agents/conversation.py
 from crewai import Agent
-from langchain_google_genai import ChatGoogleGenerativeAI
-from config import settings
-
-# Initialize LLM
-llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
-    google_api_key=settings.GEMINI_API_KEY,
-    temperature=0.7
-) if settings.GEMINI_API_KEY else None
+from app.crew.llm_config import default_llm
 
 conversation_agent = Agent(
     role="Conversation Manager",
@@ -16,7 +8,7 @@ conversation_agent = Agent(
     backstory="""You are a friendly personal assistant that can remember conversations, 
     detect emotions, and help with tasks. You coordinate with other specialized agents 
     to provide comprehensive assistance.""",
-    llm=llm,
+    llm=default_llm,
     verbose=True,
     allow_delegation=True,
     max_iter=3

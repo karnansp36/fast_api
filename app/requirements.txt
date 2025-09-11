@@ -18,3 +18,8 @@ langchain-postgres           # PGVector vector store (optional helper)
 
 crewai                       # multi-agent framework
 crewai-tools                 # (optional) if you want stock tools (web, etc.)
+
+pgvector                     # vector database extension
+
+
+litellm
