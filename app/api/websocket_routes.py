@@ -1,6 +1,7 @@
 # api/websocket_routes.py
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.crew.orchestrator import run_crew
+# Replace old orchestrator import with enhanced orchestrator
+from app.crew.orchestrator_enhanced import run_enhanced_crew as run_crew
 import json
 from typing import Dict
 import asyncio

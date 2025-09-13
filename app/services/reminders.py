@@ -1,27 +1,62 @@
 # services/reminders.py
 from datetime import datetime
 from typing import Dict, Any, List
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.exc import SQLAlchemyError
+from dateutil import parser
+from app.core.models import Task
 
-# Simple in-memory storage for demo
-reminders_store = {}
-
-def create_reminder(task: str, time: str = None, user_id: str = "default") -> Dict[str, Any]:
-    """Create a reminder task"""
+async def create_reminder(task: str, time: str = None, user_id: str = "default", db: AsyncSession = None) -> Dict[str, Any]:
     try:
-        reminder_id = f"{user_id}_{len(reminders_store)}"
-        reminder = {
-            "id": reminder_id,
-            "task": task,
-            "time": time or "now",
-            "user_id": user_id,
-            "status": "scheduled",
-            "created_at": datetime.now().isoformat()
+        due_time = None
+        if time and time != "now":
+            try:
+                due_time = parser.parse(time)
+            except (ValueError, TypeError):
+                return {"error": f"Invalid time format: {time}"}
+        
+        reminder = Task(
+            user_id=user_id,
+            text=task,
+            due_time=due_time,
+            status="scheduled",
+        )
+        db.add(reminder)
+        await db.commit()
+        await db.refresh(reminder)
+
+        return {
+            "id": reminder.id,
+            "task": reminder.text,
+            "time": reminder.due_time.isoformat() if reminder.due_time else "now",
+            "user_id": reminder.user_id,
+            "status": reminder.status,
+            "created_at": reminder.created_at.isoformat(),
         }
-        reminders_store[reminder_id] = reminder
-        return reminder
-    except Exception as e:
+
+    except (ValueError, SQLAlchemyError) as e:
+        await db.rollback()
         return {"error": f"Failed to create reminder: {str(e)}"}
 
-def get_user_reminders(user_id: str) -> List[Dict[str, Any]]:
-    """Get all reminders for a user"""
-    return [r for r in reminders_store.values() if r.get("user_id") == user_id]
+async def get_user_reminders(user_id: str, db: AsyncSession) -> List[Dict[str, Any]]:
+    """Get all reminders for a user from DB"""
+    try:
+        result = await db.execute(
+            select(Task).where(Task.user_id == user_id)
+        )
+        tasks = result.scalars().all()
+
+        return [
+            {
+                "id": task.id,
+                "task": task.text,
+                "time": task.due_time.isoformat() if task.due_time else "now",
+                "user_id": task.user_id,
+                "status": task.status,
+                "created_at": task.created_at.isoformat(),
+            }
+            for task in tasks
+        ]
+    except SQLAlchemyError as e:
+        return [{"error": f"Failed to fetch reminders: {str(e)}"}]

@@ -18,7 +18,7 @@ try:
         verbose=False,  # keep clean like conversation agent
         allow_delegation=False,  # disable delegation
         max_iter=3,  # allow slightly more iterations for task complexity
-        max_execution_time=60  # give more time for task handling
+        max_execution_time=120  # give more time for task handling
     )
 except Exception as e:
     logger.error(f"Failed to create task agent: {e}")

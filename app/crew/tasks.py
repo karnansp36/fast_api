@@ -5,29 +5,47 @@ from app.crew.agents.emotion import emotion_agent
 from app.crew.agents.memory import memory_agent
 from app.crew.agents.task import task_agent
 
+# crew/tasks.py - UPDATED CONVERSATION TASK
 def create_conversation_task(message: str, user_id: str, context: dict = None) -> Task:
+    background_agents = context.get('background_agents', [])
+    background_actions = context.get('background_actions', {})
+    
     return Task(
         description=f"""
         Analyze the user message: "{message}" from user {user_id}.
         
         Context available: {context}
         
-        IMPORTANT: You are the main coordinator. Use the Ask question to coworker tool to 
-        get information from other agents, but provide the final response yourself.
+        Your role is to maintain natural conversation while identifying when to 
+        delegate tasks to specialized agents in the background.
         
-        Determine the intent and coordinate with other agents as needed:
-        1. If the user wants to remember something, ask the memory agent
-        2. If the user wants to create a reminder/task, ask the task agent  
-        3. If the user seems emotional, get context from emotion agent
-        4. Provide a natural, helpful response based on the user's needs
+        Available background agents: {background_agents}
+        Recommended actions: {background_actions}
         
-        Use the provided context to give personalized responses when possible.
-        Always maintain conversation context and be helpful and friendly.
-        DO NOT use the "Delegate work to coworker" tool - use "Ask question to coworker" instead.
+        Follow these guidelines:
+        1. If background agents are available, use the AsyncDelegationTool to 
+           delegate tasks to them with the appropriate actions
+        2. Continue the conversation naturally without mentioning the delegation
+        3. Provide immediate responses that acknowledge the user's request
+        4. Use the context to personalize your responses
+        
+        Examples:
+        - User: "Remember that I like coffee with two sugars"
+          Response: "Got it! I'll remember your coffee preference." 
+          (while delegating to memory agent with store action)
+        
+        - User: "Remind me to call John at 3pm"
+          Response: "I'll set a reminder for you to call John at 3pm." 
+          (while delegating to task agent with create action)
+        
+        - User: "I'm feeling really stressed today"
+          Response: "I'm sorry to hear you're feeling stressed. Is there anything specific on your mind?" 
+          (while delegating to emotion agent with analyze action)
         """,
         agent=conversation_agent,
-        expected_output="A natural conversational response that addresses the user's needs"
+        expected_output="A natural conversational response that acknowledges the user's request while delegating appropriate tasks to background agents"
     )
+
 def create_emotion_task(message: str) -> Task:
     return Task(
         description=f"""
@@ -86,10 +104,10 @@ def create_task_management_task(message: str, user_id: str, action: str) -> Task
             
             Extract:
             1. What task/reminder to create (be specific)
-            2. When it should be scheduled (if specified, otherwise use "now")
+            2. When it should be scheduled (must be in ISO format like "2023-12-25 14:30" or "now")
             3. Any additional details
             
-            If the message doesn't specify details, ask the user for clarification.
+            If no time is specified, use "now".
             Use the create_reminder tool to set up the task.
             Make sure to pass string values, not dictionaries, to the tool.
             """,
