@@ -58,4 +58,4 @@ except Exception as e:
     # Create dummy instances
     default_llm = None
     creative_llm = None
-    analytical_llm = None
+    analytical_llm = None  # Removed the extra 'i' character here
