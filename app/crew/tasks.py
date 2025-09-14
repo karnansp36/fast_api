@@ -4,47 +4,64 @@ from app.crew.agents.conversation import conversation_agent
 from app.crew.agents.emotion import emotion_agent
 from app.crew.agents.memory import memory_agent
 from app.crew.agents.task import task_agent
+from typing import Dict, Any
 
 # crew/tasks.py - UPDATED CONVERSATION TASK
-def create_conversation_task(message: str, user_id: str, context: dict = None) -> Task:
+def create_conversation_task(message: str, user_id: str, context: Dict[str, Any]) -> Task:
+    """Create a conversation task that handles both chat and delegation"""
+    
     background_agents = context.get('background_agents', [])
     background_actions = context.get('background_actions', {})
     
-    return Task(
-        description=f"""
-        Analyze the user message: "{message}" from user {user_id}.
-        
-        Context available: {context}
-        
-        Your role is to maintain natural conversation while identifying when to 
-        delegate tasks to specialized agents in the background.
-        
-        Available background agents: {background_agents}
-        Recommended actions: {background_actions}
-        
-        Follow these guidelines:
-        1. If background agents are available, use the AsyncDelegationTool to 
-           delegate tasks to them with the appropriate actions
-        2. Continue the conversation naturally without mentioning the delegation
-        3. Provide immediate responses that acknowledge the user's request
-        4. Use the context to personalize your responses
-        
-        Examples:
-        - User: "Remember that I like coffee with two sugars"
-          Response: "Got it! I'll remember your coffee preference." 
-          (while delegating to memory agent with store action)
-        
-        - User: "Remind me to call John at 3pm"
-          Response: "I'll set a reminder for you to call John at 3pm." 
-          (while delegating to task agent with create action)
-        
-        - User: "I'm feeling really stressed today"
-          Response: "I'm sorry to hear you're feeling stressed. Is there anything specific on your mind?" 
-          (while delegating to emotion agent with analyze action)
-        """,
-        agent=conversation_agent,
-        expected_output="A natural conversational response that acknowledges the user's request while delegating appropriate tasks to background agents"
-    )
+    if background_agents:
+        # Task with delegation capability
+        return Task(
+            description=f"""Continue the conversation with the user while handling background tasks.
+            
+            User Message: {message}
+            
+            User Context:
+            - Recent conversation: {context.get('recent_conversation', [])}
+            - User information: {context.get('user_info', [])}
+            - Pending tasks: {context.get('pending_tasks', [])}
+            
+            Background tasks needed:
+            {', '.join([f'{agent}: {action}' for agent, action in background_actions.items()])}
+            
+            Instructions:
+            1. First, provide a natural conversational response to the user
+            2. Then, use the AsyncDelegationTool to handle the background tasks
+            3. Never mention that you're delegating tasks - keep the conversation natural
+            4. If it's a task creation, confirm it was done naturally
+            5. Reference previous conversations when relevant
+            """,
+            agent=conversation_agent,
+            expected_output="A natural conversational response that addresses the user's message and handles any background tasks seamlessly"
+        )
+    else:
+        # Pure conversation task
+        return Task(
+            description=f"""Have a natural conversation with the user, referencing previous context when appropriate.
+            
+            User Message: {message}
+            
+            User Context:
+            - Recent conversation: {context.get('recent_conversation', [])}
+            - User information: {context.get('user_info', [])}
+            - Pending tasks: {context.get('pending_tasks', [])}
+            
+            Instructions:
+            1. Respond naturally to the user's message
+            2. Reference previous conversations or user information when relevant
+            3. Maintain a friendly, helpful tone
+            4. If the user asks about tasks or reminders, respond conversationally
+            5. Only use delegation if explicitly asked to create/store something
+            """,
+            agent=conversation_agent,
+            expected_output="A natural, contextual conversational response"
+        )
+    
+
 
 def create_emotion_task(message: str) -> Task:
     return Task(

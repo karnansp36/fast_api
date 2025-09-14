@@ -6,6 +6,7 @@ import asyncio
 import logging
 import time
 from app.crew.llm_config import default_llm
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -54,21 +55,29 @@ class EnhancedOrchestrator:
     
     async def process_message(self, message: str, user_id: str) -> str:
         """Enhanced message processing with conversation agent as primary interface"""
-        # Get user context
+        # Get user context with more comprehensive memory
         context = await self._get_user_context(user_id)
         
-        # Use router to determine which agents should handle this in background
-        selected_agent_names = await self.router.select_best_agent(message, context)
+        # First, check if this is a clear task/reminder creation request
+        requires_delegation = self._requires_delegation(message, context)
         
-        # Filter out conversation agent (we'll handle that separately)
-        background_agents = [name for name in selected_agent_names 
-                           if name in self.agent_instances and name != "conversation_agent"]
+        if requires_delegation:
+            # Use router to determine which agents should handle this
+            selected_agent_names = await self.router.select_best_agent(message, context)
+            
+            # Filter out conversation agent (we'll handle that separately)
+            background_agents = [name for name in selected_agent_names 
+                               if name in self.agent_instances and name != "conversation_agent"]
+            
+            # Add background agents info to context for conversation agent to use
+            context['background_agents'] = background_agents
+            context['background_actions'] = self._determine_agent_actions(message, background_agents)
+        else:
+            # No delegation needed, just conversation
+            context['background_agents'] = []
+            context['background_actions'] = {}
         
-        # Add background agents info to context for conversation agent to use
-        context['background_agents'] = background_agents
-        context['background_actions'] = self._determine_agent_actions(message, background_agents)
-        
-        # Execute only with conversation agent (which will handle background delegation)
+        # Execute with conversation agent
         result = await self._execute_single_agent("conversation_agent", message, user_id, context)
         
         # Update performance metrics
@@ -77,6 +86,44 @@ class EnhancedOrchestrator:
         
         return result
     
+    def _requires_delegation(self, message: str, context: Dict[str, Any]) -> bool:
+        """Determine if this message requires delegation to specialized agents"""
+        message_lower = message.lower()
+        
+        # Clear task/reminder creation patterns
+        task_patterns = [
+            r'remind me to', r'set a reminder for', r'create a task to',
+            r'schedule a reminder for', r'add to my tasks', r'create reminder for',
+            r'set reminder for', r'add task to', r'please remind me to',
+            r'can you remind me to', r'could you remind me to'
+        ]
+        
+        # Check for explicit task creation patterns
+        for pattern in task_patterns:
+            if re.search(pattern, message_lower):
+                return True
+        
+        # Check for memory storage patterns
+        memory_patterns = [
+            r'remember that', r'store this', r'save this information',
+            r'keep in mind that', r'make a note that', r'don\'t forget that'
+        ]
+        
+        for pattern in memory_patterns:
+            if re.search(pattern, message_lower):
+                return True
+        
+        # Check if this is a follow-up to a previous task creation context
+        recent_conversation = context.get('recent_conversation', [])
+        if recent_conversation:
+            # Check if previous conversation was about task creation
+            last_interaction = str(recent_conversation[0]).lower() if recent_conversation else ""
+            if any(word in last_interaction for word in ['task', 'reminder', 'schedule', 'todo']):
+                if any(word in message_lower for word in ['yes', 'ok', 'confirm', 'do it', 'please']):
+                    return True
+        
+        return False
+    
     def _determine_agent_actions(self, message: str, agent_names: List[str]) -> Dict[str, str]:
         """Determine what actions background agents should take"""
         actions = {}
@@ -84,12 +131,12 @@ class EnhancedOrchestrator:
         
         for agent_name in agent_names:
             if agent_name == "memory_agent":
-                if any(word in message_lower for word in ["remember", "store", "save"]):
+                if any(word in message_lower for word in ["remember", "store", "save", "note"]):
                     actions[agent_name] = "store"
                 else:
                     actions[agent_name] = "search"
             elif agent_name == "task_agent":
-                if any(word in message_lower for word in ["create", "add", "new", "set"]):
+                if any(word in message_lower for word in ["create", "add", "new", "set", "schedule"]):
                     actions[agent_name] = "create"
                 else:
                     actions[agent_name] = "get"
@@ -125,7 +172,7 @@ class EnhancedOrchestrator:
         # Other agents are handled through async delegation
     
     async def _get_user_context(self, user_id: str) -> Dict[str, Any]:
-        """Get user context from memory service"""
+        """Get comprehensive user context from memory service"""
         context = {
             "recent_conversation": [],
             "user_info": [],
@@ -134,18 +181,28 @@ class EnhancedOrchestrator:
         }
         
         try:
+            # Get more conversation history for better context
             context["recent_conversation"] = await self.memory_service.search_memories(
-                user_id, "conversation", limit=5
+                user_id, "conversation", limit=10
             )
         except Exception as e:
             logger.warning(f"Could not fetch recent conversations: {e}")
         
         try:
+            # Get comprehensive user info
             context["user_info"] = await self.memory_service.search_memories(
-                user_id, "personal_info", limit=10
+                user_id, "personal_info", limit=20
             )
         except Exception as e:
             logger.warning(f"Could not fetch user info: {e}")
+            
+        try:
+            # Get recent tasks for context
+            context["pending_tasks"] = await self.memory_service.search_memories(
+                user_id, "task", limit=5
+            )
+        except Exception as e:
+            logger.warning(f"Could not fetch pending tasks: {e}")
             
         return context
 
