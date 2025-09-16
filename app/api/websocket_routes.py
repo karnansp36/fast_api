@@ -1,7 +1,6 @@
 # api/websocket_routes.py
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-# Replace old orchestrator import with enhanced orchestrator
-from app.crew.orchestrator_enhanced import run_enhanced_crew as run_crew
+from app.crew.orchestrator import run_personal_manager as run_crew
 import json
 from typing import Dict
 import asyncio
@@ -71,7 +70,7 @@ async def process_message_with_timeout(websocket, user_id, message, start_time):
         end_time = time.time()
         processing_time = end_time - start_time
         logger.error(f"Error processing message for user {user_id}: {str(e)}")
-        logger.error(f"Full traceback: {traceback.format_exc()}")  # ADD THIS LINE
+        logger.error(f"Full traceback: {traceback.format_exc()}")
 
         if user_id in manager.active_connections:
             await websocket.send_json({

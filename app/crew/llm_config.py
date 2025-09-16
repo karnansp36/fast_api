@@ -1,4 +1,4 @@
-# crew/llm_config.py - FIXED VERSION
+# crew/llm_config.py
 from crewai import LLM
 from app.config import settings
 import time
@@ -16,11 +16,11 @@ def get_llm(temperature=0.7, max_retries=3):
             
             if settings.GEMINI_API_KEY:
                 return LLM(
-                    model="gemini/gemini-2.0-flash",  # Use stable version
+                    model="gemini/gemini-2.0-flash",
                     api_key=settings.GEMINI_API_KEY,
                     temperature=temperature,
                     max_retries=2,
-                    timeout=60  # Increased timeout
+                    timeout=60
                 )
             
             elif hasattr(settings, 'OPENAI_API_KEY') and settings.OPENAI_API_KEY:
@@ -34,9 +34,8 @@ def get_llm(temperature=0.7, max_retries=3):
             
             else:
                 logger.warning("No API key found, using fallback LLM")
-                # Create a simple fallback that works
                 return LLM(
-                    model="ollama/llama2",  # This won't work but won't crash
+                    model="ollama/llama2",
                     base_url="http://localhost:11434",
                     temperature=temperature
                 )
@@ -44,7 +43,6 @@ def get_llm(temperature=0.7, max_retries=3):
         except Exception as e:
             logger.error(f"LLM creation attempt {attempt + 1} failed: {e}")
             if attempt == max_retries - 1:
-                # Final fallback - create a minimal working LLM
                 return LLM(model="gpt-3.5-turbo", api_key="dummy")
             time.sleep(1)
 
@@ -55,7 +53,6 @@ try:
     analytical_llm = get_llm(temperature=0.3)
 except Exception as e:
     logger.error(f"Failed to create LLM instances: {e}")
-    # Create dummy instances
     default_llm = None
     creative_llm = None
-    analytical_llm = None  # Removed the extra 'i' character here
+    analytical_llm = None

@@ -1,11 +1,12 @@
+# services/memory_service.py
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, and_, cast, String, text
+from sqlalchemy import select, or_, and_, cast, String, text, desc
 from app.core.db import AsyncSessionLocal
-from app.core.models import Memory
+from app.core.models import Memory, ConversationHistory
 from app.services.embeddings import embed_text
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 class MemoryService:
@@ -28,10 +29,10 @@ class MemoryService:
             
             async with AsyncSessionLocal() as session:
                 memory = Memory(
-                    user_id=str(user_id),  # Ensure string conversion
+                    user_id=str(user_id),
                     text=text_content,
+                    memory_type=memory_type,
                     meta_data={
-                        "type": memory_type,
                         "original_content": content,
                         **(meta_data or {})
                     },
@@ -44,15 +45,16 @@ class MemoryService:
                 
         except Exception as e:
             return f"Error storing memory: {str(e)}"
+    
     async def search_memories(
         self, user_id: str, memory_type: Optional[str] = None,
         query: str = "", limit: int = 5
     ) -> List[Dict[str, Any]]:
-        """Search memories with optional filtering by type and query (DB-agnostic)."""
+        """Search memories with optional filtering by type and query"""
         try:
             async with AsyncSessionLocal() as session:
                 base_query = select(Memory).where(Memory.user_id == str(user_id))
-                base_query = base_query.order_by(Memory.created_at.desc()).limit(100)  # fetch a bit more
+                base_query = base_query.order_by(desc(Memory.created_at)).limit(100)
 
                 result = await session.execute(base_query)
                 memories = result.scalars().all()
@@ -60,7 +62,7 @@ class MemoryService:
                 # Python-side filtering
                 filtered = []
                 for mem in memories:
-                    if memory_type and mem.meta_data.get("type") != memory_type:
+                    if memory_type and mem.memory_type != memory_type:
                         continue
                     if query:
                         query_lower = query.lower()
@@ -77,7 +79,7 @@ class MemoryService:
                     "user_id": mem.user_id,
                     "content": mem.meta_data.get("original_content", {}),
                     "text": mem.text,
-                    "type": mem.meta_data.get("type", "unknown"),
+                    "type": mem.memory_type,
                     "created_at": mem.created_at.isoformat() if mem.created_at else None,
                     "meta_data": mem.meta_data
                 } for mem in filtered]
@@ -85,54 +87,72 @@ class MemoryService:
         except Exception as e:
             print(f"Error searching memories: {e}")
             return []
-
     
-  
-    async def get_recent_memories(self, user_id: str, memory_type: Optional[str] = None,
-                                 limit: int = 10) -> List[Dict[str, Any]]:
-        """Get recent memories, optionally filtered by type"""
-        return await self.search_memories(str(user_id), memory_type, "", limit)
-    
-    async def search_similar_memories(self, user_id: str, query_text: str, 
-                                        memory_type: Optional[str] = None, 
-                                        limit: int = 3) -> List[Dict[str, Any]]:
-            """Search for similar memories using embedding similarity"""
-            try:
-                # Generate embedding for query
-                query_embedding = embed_text(query_text)
+    async def get_conversation_history(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent conversation history"""
+        try:
+            async with AsyncSessionLocal() as session:
+                result = await session.execute(
+                    select(ConversationHistory)
+                    .where(ConversationHistory.user_id == str(user_id))
+                    .order_by(desc(ConversationHistory.created_at))
+                    .limit(limit)
+                )
+                history = result.scalars().all()
                 
-                async with AsyncSessionLocal() as session:
-                    # Build base query
-                    base_query = select(Memory).where(Memory.user_id == str(user_id))
-                    
-                    # Add memory type filter if specified
-                    if memory_type:
-                        base_query = base_query.where(
-                            text("memories.meta_data->>'type' = :mem_type")
-                        ).params(mem_type=memory_type)
-                    
-                    # Use pgvector cosine distance for similarity search
-                    base_query = base_query.order_by(
-                        Memory.embedding.cosine_distance(query_embedding)
-                    ).limit(limit)
-                    
-                    result = await session.execute(base_query)
-                    memories = result.scalars().all()
-                    
-                    return [{
-                        "id": mem.id,
-                        "content": mem.meta_data.get("original_content", {}),
-                        "text": mem.text,
-                        "type": mem.meta_data.get("type", "unknown"),
-                        "similarity_score": 1 - float(mem.embedding.cosine_distance(query_embedding)),
-                        "created_at": mem.created_at.isoformat() if mem.created_at else None
-                    } for mem in memories]
-                    
-            except Exception as e:
-                print(f"Error searching similar memories: {e}")
-                # Fallback to text search
-                return await self.search_memories(str(user_id), memory_type, query_text, limit)
-        
+                return [{
+                    "id": h.id,
+                    "user_id": h.user_id,
+                    "message": h.message,
+                    "response": h.response,
+                    "emotion": h.emotion,
+                    "created_at": h.created_at.isoformat() if h.created_at else None
+                } for h in history]
+                
+        except Exception as e:
+            print(f"Error getting conversation history: {e}")
+            return []
+    
+    async def store_conversation(self, user_id: str, message: str, response: str, emotion: str = None):
+        """Store a conversation exchange"""
+        try:
+            async with AsyncSessionLocal() as session:
+                conversation = ConversationHistory(
+                    user_id=str(user_id),
+                    message=message,
+                    response=response,
+                    emotion=emotion
+                )
+                session.add(conversation)
+                await session.commit()
+                return True
+        except Exception as e:
+            print(f"Error storing conversation: {e}")
+            return False
+    
+    async def get_user_context(self, user_id: str) -> Dict[str, Any]:
+        """Get comprehensive user context for the personal manager"""
+        try:
+            # Get recent conversation history
+            conversation_history = await self.get_conversation_history(user_id, 5)
+            
+            # Get recent memories
+            recent_memories = await self.search_memories(user_id, limit=3)
+            
+            # Get user preferences
+            preferences = await self.search_memories(user_id, "preference", limit=5)
+            
+            return {
+                "conversation_history": conversation_history,
+                "recent_memories": recent_memories,
+                "preferences": preferences,
+                "last_updated": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            print(f"Error getting user context: {e}")
+            return {}
+    
     def _content_to_text(self, content: Dict[str, Any]) -> str:
         """Convert content dictionary to searchable text"""
         if isinstance(content, str):
