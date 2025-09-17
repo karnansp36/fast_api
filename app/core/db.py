@@ -1,4 +1,4 @@
-# core/db.py
+# app/core/db.py
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 import asyncpg
@@ -17,3 +17,6 @@ async def get_session():
 
 async def get_asyncpg_conn():
     return await asyncpg.connect(settings.DATABASE_URL.replace("+asyncpg", ""))
+
+# Make sure it's available for import
+__all__ = ['engine', 'AsyncSessionLocal', 'Base', 'get_session', 'get_asyncpg_conn']

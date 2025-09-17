@@ -1,9 +1,10 @@
-# main.py
+# main.py - FIXED VERSION
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.api.websocket_routes import router as chat_router
-from app.core.db import Base, engine
+from app.core.db import Base, engine, AsyncSessionLocal  # Import AsyncSessionLocal
+from sqlalchemy import text
 import asyncio
 import logging
 import time
@@ -31,8 +32,15 @@ async def lifespan(app: FastAPI):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Database tables created/verified")
+        
+        # Test database connection
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+        logger.info("Database connection test successful")
+        
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
+        # Continue anyway - the app might work with limited functionality
     
     # Initialize services
     try:

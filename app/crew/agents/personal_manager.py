@@ -29,7 +29,7 @@ try:
         verbose=False,
         allow_delegation=False,
         max_iter=3,
-        max_execution_time=45
+        max_execution_time=120,
     )
 except Exception as e:
     logger.error(f"Failed to create personal manager agent: {e}")

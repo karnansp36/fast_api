@@ -9,3 +9,314 @@
 2025-09-17 00:52:47,936 - app.api.websocket_routes - INFO - Request completed in 0.31 seconds for user test_user_124
 2025-09-17 00:53:30,010 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
 2025-09-17 00:53:30,110 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-17 22:26:49,703 - app.main - INFO - Starting Personal Manager API...
+2025-09-17 22:26:49,780 - app.main - INFO - Database tables created/verified
+2025-09-17 22:26:49,781 - app.main - INFO - Emotion service initialized
+2025-09-17 22:29:16,045 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-17 23:00:06,654 - app.main - INFO - Starting Personal Manager API...
+2025-09-17 23:00:06,683 - app.main - INFO - Database tables created/verified
+2025-09-17 23:00:06,683 - app.main - INFO - Emotion service initialized
+2025-09-17 23:05:01,421 - app.services.emotion_service - ERROR - Emotion detection failed: PreTrainedTokenizerFast._batch_encode_plus() got an unexpected keyword argument 'local_files_only'
+2025-09-17 23:05:01,461 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:05:50,078 - app.crew.orchestrator - ERROR - Personal manager failed: Task 'Have a natural, empathetic conversation with the user while handling any background tasks seamlessly.
+
+USER MESSAGE: hi
+
+
+DETECTED EMOTION: neutral
+
+USER CONTEXT:
+- Conversation History:
+  No recent conversation history
+
+- Recent Memories:
+  No recent memories
+
+- User Preferences:
+  No stored preferences
+
+INSTRUCTIONS:
+1. Respond naturally and empathetically to the user's message
+2. Adjust your tone based on the detected emotion
+3. Use tools as needed to handle tasks, reminders, or memory operations
+4. Never mention technical details or delegation - just confirm actions naturally
+5. Reference previous conversations and user context when relevant
+6. Maintain a consistent, warm personality throughout
+7. If using tools, integrate the results seamlessly into the conversation
+
+EXAMPLE RESPONSES:
+- For task creation: "Sure, I've added that to your tasks!"
+- For memory storage: "I'll remember that for you."
+- For emotional content: "I understand how you're feeling. [empathetic response]"
+
+Keep your response conversational and focused on the user's needs.' execution timed out after 45 seconds. Consider increasing max_execution_time or optimizing the task.
+2025-09-17 23:05:50,079 - app.api.websocket_routes - INFO - Request completed in 48.86 seconds for user test_user_124
+2025-09-17 23:14:02,417 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-17 23:14:02,516 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-17 23:15:59,983 - app.main - INFO - Starting Personal Manager API...
+2025-09-17 23:16:00,012 - app.main - INFO - Database tables created/verified
+2025-09-17 23:16:00,012 - app.main - INFO - Emotion service initialized
+2025-09-17 23:18:52,782 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-17 23:20:08,543 - app.main - INFO - Starting Personal Manager API...
+2025-09-17 23:20:08,572 - app.main - INFO - Database tables created/verified
+2025-09-17 23:20:08,572 - app.main - INFO - Emotion service initialized
+2025-09-17 23:20:41,934 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-17 23:21:56,637 - app.main - INFO - Starting Personal Manager API...
+2025-09-17 23:21:56,667 - app.main - INFO - Database tables created/verified
+2025-09-17 23:21:56,667 - app.main - INFO - Emotion service initialized
+2025-09-17 23:22:13,001 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:23:07,014 - app.crew.orchestrator - ERROR - Personal manager failed: Task 'Have a natural, empathetic conversation with the user while handling any background tasks seamlessly.
+
+USER MESSAGE: hi
+
+
+DETECTED EMOTION: anger
+
+USER CONTEXT:
+- Conversation History:
+  No recent conversation history
+
+- Recent Memories:
+  No recent memories
+
+- User Preferences:
+  No stored preferences
+
+INSTRUCTIONS:
+1. Respond naturally and empathetically to the user's message
+2. Adjust your tone based on the detected emotion
+3. Use tools as needed to handle tasks, reminders, or memory operations
+4. Never mention technical details or delegation - just confirm actions naturally
+5. Reference previous conversations and user context when relevant
+6. Maintain a consistent, warm personality throughout
+7. If using tools, integrate the results seamlessly into the conversation
+
+EXAMPLE RESPONSES:
+- For task creation: "Sure, I've added that to your tasks!"
+- For memory storage: "I'll remember that for you."
+- For emotional content: "I understand how you're feeling. [empathetic response]"
+
+Keep your response conversational and focused on the user's needs.' execution timed out after 45 seconds. Consider increasing max_execution_time or optimizing the task.
+2025-09-17 23:23:07,014 - app.api.websocket_routes - INFO - Request completed in 54.14 seconds for user test_user_124
+2025-09-17 23:26:36,280 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:28:19,084 - app.main - INFO - Starting Personal Manager API...
+2025-09-17 23:28:19,113 - app.main - INFO - Database tables created/verified
+2025-09-17 23:28:19,113 - app.main - INFO - Emotion service initialized
+2025-09-17 23:30:48,024 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:31:36,062 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:32:37,496 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:33:25,633 - app.crew.orchestrator - ERROR - Personal manager failed: Task execution failed: litellm.APIConnectionError: GeminiException - [Errno 101] Network is unreachable
+2025-09-17 23:33:25,634 - app.api.websocket_routes - INFO - Request completed in 157.76 seconds for user test_user_124
+2025-09-17 23:35:41,724 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-17 23:35:41,824 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-17 23:42:45,878 - app.main - INFO - Starting Personal Manager API...
+2025-09-17 23:42:45,932 - app.main - INFO - Database tables created/verified
+2025-09-17 23:42:45,932 - app.main - INFO - Emotion service initialized
+2025-09-17 23:44:22,694 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:47:22,561 - app.api.websocket_routes - ERROR - Request timeout after 180.00 seconds for user test_user_124
+2025-09-17 23:47:22,599 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:50:22,562 - app.api.websocket_routes - ERROR - Request timeout after 180.00 seconds for user test_user_124
+2025-09-17 23:58:12,923 - app.main - INFO - Starting Personal Manager API...
+2025-09-17 23:58:12,996 - app.main - INFO - Database tables created/verified
+2025-09-17 23:58:12,996 - app.main - INFO - Emotion service initialized
+2025-09-17 23:58:51,173 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:58:54,335 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-17 23:58:54,336 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-17 23:58:54,339 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): Initial greeting from user with detected anger....
+2025-09-17 23:58:54,342 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): Initial greeting from user with detected anger....
+2025-09-17 23:58:54,344 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:58:56,227 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-17 23:58:56,228 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-17 23:58:56,239 - app.api.websocket_routes - INFO - Request completed in 5.29 seconds for user test_user_124
+2025-09-17 23:59:14,910 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:59:18,914 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-17 23:59:18,915 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-17 23:59:18,917 - app.tools.memory_tools - INFO - Storing memory for user user (type: fact): Django is a high-level Python web framework that e...
+2025-09-17 23:59:18,919 - app.tools.memory_tools - INFO - Storing memory for user user (type: fact): Django is a high-level Python web framework that e...
+2025-09-17 23:59:18,921 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:59:21,270 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-17 23:59:21,271 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-17 23:59:21,276 - app.api.websocket_routes - INFO - Request completed in 6.49 seconds for user test_user_124
+2025-09-17 23:59:35,288 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-17 23:59:38,059 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-17 23:59:38,060 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-17 23:59:38,068 - app.api.websocket_routes - INFO - Request completed in 2.87 seconds for user test_user_124
+2025-09-18 00:00:01,047 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:00:04,112 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:00:04,113 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:00:04,115 - app.tools.reminder_tools - INFO - Creating reminder for user karnan: Sleep...
+2025-09-18 00:00:04,117 - app.tools.reminder_tools - ERROR - Failed to create reminder: Task <Task pending name='Task-44' coro=<CreateReminderTool._run.<locals>.create_reminder_async() running at /mnt/g/Full Stack/Ai/final_saas/fastapi/app/tools/reminder_tools.py:53> cb=[run_until_complete.<locals>.done_cb()]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2025-09-18 00:00:04,117 - app.tools.reminder_tools - INFO - Creating reminder for user karnan: Sleep...
+2025-09-18 00:00:04,119 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:00:06,273 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:00:06,274 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:00:06,276 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:00:08,527 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:00:08,528 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:00:08,529 - app.tools.reminder_tools - INFO - Creating reminder for user karnan: Take a nap...
+2025-09-18 00:00:08,531 - app.tools.reminder_tools - ERROR - Failed to create reminder: Task <Task pending name='Task-48' coro=<CreateReminderTool._run.<locals>.create_reminder_async() running at /mnt/g/Full Stack/Ai/final_saas/fastapi/app/tools/reminder_tools.py:53> cb=[run_until_complete.<locals>.done_cb()]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2025-09-18 00:00:08,531 - app.tools.reminder_tools - INFO - Creating reminder for user karnan: Take a nap...
+2025-09-18 00:00:08,533 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:00:10,570 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:00:10,571 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:00:10,572 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:00:12,357 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:00:12,358 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:00:12,364 - app.api.websocket_routes - INFO - Request completed in 11.44 seconds for user test_user_124
+2025-09-18 00:00:29,821 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:00:32,512 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:00:32,513 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:00:32,515 - app.tools.memory_tools - INFO - Storing memory for user karnan (type: fact): User's name is Karnan...
+2025-09-18 00:00:32,517 - app.tools.memory_tools - INFO - Storing memory for user karnan (type: fact): User's name is Karnan...
+2025-09-18 00:00:32,519 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:00:34,431 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:00:34,432 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:00:34,440 - app.api.websocket_routes - INFO - Request completed in 4.68 seconds for user test_user_124
+2025-09-18 00:02:12,277 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:02:14,565 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:02:14,566 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:02:14,568 - app.tools.reminder_tools - INFO - Creating reminder for user karnan: buy groceries...
+2025-09-18 00:02:14,569 - app.tools.reminder_tools - INFO - Creating reminder for user karnan: buy groceries...
+2025-09-18 00:02:14,570 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:02:17,192 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:02:17,193 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:02:17,195 - app.tools.async_delegation_tool - INFO - Delegating to time_converter for user karnan: Convert tomorrow at 5 PM to ISO format...
+2025-09-18 00:02:17,196 - app.tools.async_delegation_tool - INFO - Delegating to time_converter for user karnan: Convert tomorrow at 5 PM to ISO format...
+2025-09-18 00:02:17,196 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:02:19,494 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:02:19,500 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:02:19,507 - app.api.websocket_routes - INFO - Request completed in 7.35 seconds for user test_user_124
+2025-09-18 00:13:03,816 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-18 00:13:03,916 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-18 00:14:56,237 - app.main - INFO - Starting Personal Manager API...
+2025-09-18 00:14:56,268 - app.main - INFO - Database tables created/verified
+2025-09-18 00:14:56,268 - app.main - ERROR - Database initialization failed: name 'AsyncSessionLocal' is not defined
+2025-09-18 00:14:56,268 - app.main - INFO - Emotion service initialized
+2025-09-18 00:22:30,134 - app.main - INFO - Starting Personal Manager API...
+2025-09-18 00:22:30,165 - app.main - INFO - Database tables created/verified
+2025-09-18 00:22:30,167 - app.main - INFO - Database connection test successful
+2025-09-18 00:22:30,167 - app.main - INFO - Emotion service initialized
+2025-09-18 00:23:47,093 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:23:49,210 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:23:49,212 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:23:49,218 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User expressed anger with initial 'hi' message....
+2025-09-18 00:23:49,220 - app.services.memory_service - ERROR - Error storing memory: Task <Task pending name='Task-17' coro=<MemoryService.store_memory() running at /mnt/g/Full Stack/Ai/final_saas/fastapi/app/services/memory_service.py:45> cb=[run_until_complete.<locals>.done_cb()]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2025-09-18 00:23:49,221 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User expressed anger with initial 'hi' message....
+2025-09-18 00:23:49,222 - app.services.memory_service - ERROR - Error storing memory: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+[SQL: INSERT INTO memories (user_id, text, memory_type, meta_data, embedding) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::JSON, $5) RETURNING memories.id, memories.created_at]
+[parameters: ('user', "text: User expressed anger with initial 'hi' message.; tags: anger, initial message; source: user_input", 'episodic', '{"original_content": {"text": "User expressed anger with initial \'hi\' message.", "tags": ["anger", "initial message"], "source": "user_input"}, "tags": ["anger", "initial message"]}', '[0.239215686917305,0.6313725709915161,0.45098039507865906,0.5568627715110779,0.5098039507865906,0.8274509906768799,0.7058823704719543,0.9333333373069 ... (6335 characters truncated) ... ,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]')]
+(Background on this error at: https://sqlalche.me/e/20/rvf5)
+2025-09-18 00:23:49,223 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:23:50,630 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:23:50,631 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:23:50,633 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:23:52,099 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:23:52,100 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:23:52,102 - app.tools.async_delegation_tool - INFO - Delegating to memory_manager for user user: Store user memory that the user expressed anger wi...
+2025-09-18 00:23:52,103 - app.tools.async_delegation_tool - INFO - Delegating to memory_manager for user user: Store user memory that the user expressed anger wi...
+2025-09-18 00:23:52,104 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:23:53,695 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:23:53,696 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:23:53,697 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:23:55,172 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:23:55,173 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:23:55,183 - app.services.memory_service - INFO - Conversation stored for user test_user_124
+2025-09-18 00:23:55,183 - app.api.websocket_routes - INFO - Request completed in 8.21 seconds for user test_user_124
+2025-09-18 00:24:08,357 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:24:10,334 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:24:10,335 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:24:10,337 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said 'notingh' with detected emotion of joy....
+2025-09-18 00:24:10,339 - app.services.memory_service - ERROR - Error storing memory: Task <Task pending name='Task-29' coro=<MemoryService.store_memory() running at /mnt/g/Full Stack/Ai/final_saas/fastapi/app/services/memory_service.py:45> cb=[run_until_complete.<locals>.done_cb()]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2025-09-18 00:24:10,340 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said 'notingh' with detected emotion of joy....
+2025-09-18 00:24:10,341 - app.services.memory_service - ERROR - Error storing memory: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+[SQL: INSERT INTO memories (user_id, text, memory_type, meta_data, embedding) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::JSON, $5) RETURNING memories.id, memories.created_at]
+[parameters: ('user', "text: User said 'notingh' with detected emotion of joy.; tags: user_interaction, joy; source: user_input", 'episodic', '{"original_content": {"text": "User said \'notingh\' with detected emotion of joy.", "tags": ["user_interaction", "joy"], "source": "user_input"}, "tags": ["user_interaction", "joy"]}', '[0.615686297416687,0.6313725709915161,0.7803921699523926,0.5607843399047852,0.2980392277240753,0.7450980544090271,0.6313725709915161,0.29803922772407 ... (6301 characters truncated) ... ,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]')]
+(Background on this error at: https://sqlalche.me/e/20/rvf5)
+2025-09-18 00:24:10,342 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:24:11,945 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:24:11,946 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:24:11,947 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:24:13,534 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:24:13,535 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:24:13,544 - app.services.memory_service - INFO - Conversation stored for user test_user_124
+2025-09-18 00:24:13,544 - app.api.websocket_routes - INFO - Request completed in 5.26 seconds for user test_user_124
+2025-09-18 00:24:17,602 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:24:19,613 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:24:19,614 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:24:19,616 - app.tools.memory_tools - INFO - Searching memories for user notingh with query: user's name
+2025-09-18 00:24:19,618 - app.services.memory_service - ERROR - Error searching memories: Task <Task pending name='Task-41' coro=<MemoryService.search_memories() running at /mnt/g/Full Stack/Ai/final_saas/fastapi/app/services/memory_service.py:112> cb=[run_until_complete.<locals>.done_cb()]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2025-09-18 00:24:19,618 - app.tools.memory_tools - INFO - Searching memories for user notingh with query: user's name
+2025-09-18 00:24:19,619 - app.services.memory_service - ERROR - Error searching memories: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+[SQL: SELECT memories.id, memories.user_id, memories.text, memories.memory_type, memories.meta_data, memories.created_at, memories.embedding 
+FROM memories 
+WHERE memories.user_id = $1::VARCHAR AND memories.memory_type = $2::VARCHAR ORDER BY memories.created_at DESC 
+ LIMIT $3::INTEGER]
+[parameters: ('notingh', 'fact', 5)]
+(Background on this error at: https://sqlalche.me/e/20/rvf5)
+2025-09-18 00:24:19,620 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:24:21,329 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:24:21,330 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:24:21,332 - app.tools.memory_tools - INFO - Storing memory for user notingh (type: episodic): The user is feeling angry....
+2025-09-18 00:24:21,334 - app.services.memory_service - ERROR - Error storing memory: Task <Task pending name='Task-45' coro=<MemoryService.store_memory() running at /mnt/g/Full Stack/Ai/final_saas/fastapi/app/services/memory_service.py:45> cb=[run_until_complete.<locals>.done_cb()]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2025-09-18 00:24:21,334 - app.tools.memory_tools - INFO - Storing memory for user notingh (type: episodic): The user is feeling angry....
+2025-09-18 00:24:21,335 - app.services.memory_service - ERROR - Error storing memory: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+[SQL: INSERT INTO memories (user_id, text, memory_type, meta_data, embedding) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::JSON, $5) RETURNING memories.id, memories.created_at]
+[parameters: ('notingh', 'text: The user is feeling angry.; tags: anger, emotion; source: user_input', 'episodic', '{"original_content": {"text": "The user is feeling angry.", "tags": ["anger", "emotion"], "source": "user_input"}, "tags": ["anger", "emotion"]}', '[0.07450980693101883,0.5568627715110779,0.4588235318660736,0.062745101749897,0.7843137383460999,0.9372549057006836,0.12156862765550613,0.172549024224 ... (6320 characters truncated) ... ,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]')]
+(Background on this error at: https://sqlalche.me/e/20/rvf5)
+2025-09-18 00:24:21,336 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:24:22,835 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:24:22,836 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:24:22,842 - app.services.memory_service - INFO - Conversation stored for user test_user_124
+2025-09-18 00:24:22,843 - app.api.websocket_routes - INFO - Request completed in 5.31 seconds for user test_user_124
+2025-09-18 00:24:35,644 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:24:37,388 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:24:37,389 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:24:37,391 - app.tools.memory_tools - INFO - Storing memory for user USER (type: fact): The user asked 'what is django'...
+2025-09-18 00:24:37,393 - app.services.memory_service - ERROR - Error storing memory: Task <Task pending name='Task-57' coro=<MemoryService.store_memory() running at /mnt/g/Full Stack/Ai/final_saas/fastapi/app/services/memory_service.py:45> cb=[run_until_complete.<locals>.done_cb()]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2025-09-18 00:24:37,393 - app.tools.memory_tools - INFO - Storing memory for user USER (type: fact): The user asked 'what is django'...
+2025-09-18 00:24:37,394 - app.services.memory_service - ERROR - Error storing memory: (sqlalchemy.dialects.postgresql.asyncpg.InterfaceError) <class 'asyncpg.exceptions._base.InterfaceError'>: cannot perform operation: another operation is in progress
+[SQL: INSERT INTO memories (user_id, text, memory_type, meta_data, embedding) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::JSON, $5) RETURNING memories.id, memories.created_at]
+[parameters: ('USER', "text: The user asked 'what is django'; tags: django, question; source: user_input", 'fact', '{"original_content": {"text": "The user asked \'what is django\'", "tags": ["django", "question"], "source": "user_input"}, "tags": ["django", "question"]}', '[0.8196078538894653,0.7882353067398071,0.6470588445663452,0.03921568766236305,0.4627451002597809,0.6078431606292725,0.42352941632270813,0.32156863808 ... (6337 characters truncated) ... ,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]')]
+(Background on this error at: https://sqlalche.me/e/20/rvf5)
+2025-09-18 00:24:37,395 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-18 00:24:39,018 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD35qEIPIwjDl7L673zIe7EEN4ngkcrN6o "HTTP/1.1 200 OK"
+2025-09-18 00:24:39,019 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-18 00:24:39,027 - app.services.memory_service - INFO - Conversation stored for user test_user_124
+2025-09-18 00:24:39,031 - app.api.websocket_routes - INFO - Request completed in 3.45 seconds for user test_user_124
+2025-09-18 00:25:26,572 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124

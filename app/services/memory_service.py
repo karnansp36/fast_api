@@ -1,13 +1,16 @@
-# services/memory_service.py
+# services/memory_service.py - UPDATED
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_, cast, String, text, desc
 from app.core.db import AsyncSessionLocal
-from app.core.models import Memory, ConversationHistory
+from app.core.models import Memory, ConversationHistory, Task
 from app.services.embeddings import embed_text
 import json
 from datetime import datetime, timedelta
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MemoryService:
     def __init__(self):
@@ -40,56 +43,35 @@ class MemoryService:
                 )
                 session.add(memory)
                 await session.commit()
+                await session.refresh(memory)
                 
                 return f"Memory stored successfully: {text_content[:50]}..."
                 
         except Exception as e:
+            logger.error(f"Error storing memory: {str(e)}")
             return f"Error storing memory: {str(e)}"
     
-    async def search_memories(
-        self, user_id: str, memory_type: Optional[str] = None,
-        query: str = "", limit: int = 5
-    ) -> List[Dict[str, Any]]:
-        """Search memories with optional filtering by type and query"""
+    async def store_conversation(self, user_id: str, message: str, response: str, emotion: str = None):
+        """Store a conversation exchange - FIXED"""
         try:
             async with AsyncSessionLocal() as session:
-                base_query = select(Memory).where(Memory.user_id == str(user_id))
-                base_query = base_query.order_by(desc(Memory.created_at)).limit(100)
-
-                result = await session.execute(base_query)
-                memories = result.scalars().all()
-
-                # Python-side filtering
-                filtered = []
-                for mem in memories:
-                    if memory_type and mem.memory_type != memory_type:
-                        continue
-                    if query:
-                        query_lower = query.lower()
-                        if query_lower not in mem.text.lower() and \
-                        query_lower not in json.dumps(mem.meta_data.get("original_content", {})).lower():
-                            continue
-                    filtered.append(mem)
-
-                # Trim to limit
-                filtered = filtered[:limit]
-
-                return [{
-                    "id": mem.id,
-                    "user_id": mem.user_id,
-                    "content": mem.meta_data.get("original_content", {}),
-                    "text": mem.text,
-                    "type": mem.memory_type,
-                    "created_at": mem.created_at.isoformat() if mem.created_at else None,
-                    "meta_data": mem.meta_data
-                } for mem in filtered]
-
+                conversation = ConversationHistory(
+                    user_id=str(user_id),
+                    message=message,
+                    response=response,
+                    emotion=emotion
+                )
+                session.add(conversation)
+                await session.commit()
+                await session.refresh(conversation)
+                logger.info(f"Conversation stored for user {user_id}")
+                return True
         except Exception as e:
-            print(f"Error searching memories: {e}")
-            return []
+            logger.error(f"Error storing conversation: {e}")
+            return False
     
     async def get_conversation_history(self, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
-        """Get recent conversation history"""
+        """Get recent conversation history - FIXED"""
         try:
             async with AsyncSessionLocal() as session:
                 result = await session.execute(
@@ -110,48 +92,93 @@ class MemoryService:
                 } for h in history]
                 
         except Exception as e:
-            print(f"Error getting conversation history: {e}")
+            logger.error(f"Error getting conversation history: {e}")
             return []
     
-    async def store_conversation(self, user_id: str, message: str, response: str, emotion: str = None):
-        """Store a conversation exchange"""
+    async def search_memories(
+        self, user_id: str, memory_type: Optional[str] = None,
+        query: str = "", limit: int = 5
+    ) -> List[Dict[str, Any]]:
+        """Search memories with optional filtering by type and query"""
         try:
             async with AsyncSessionLocal() as session:
-                conversation = ConversationHistory(
-                    user_id=str(user_id),
-                    message=message,
-                    response=response,
-                    emotion=emotion
-                )
-                session.add(conversation)
-                await session.commit()
-                return True
+                base_query = select(Memory).where(Memory.user_id == str(user_id))
+                
+                if memory_type:
+                    base_query = base_query.where(Memory.memory_type == memory_type)
+                
+                base_query = base_query.order_by(desc(Memory.created_at)).limit(limit)
+
+                result = await session.execute(base_query)
+                memories = result.scalars().all()
+
+                return [{
+                    "id": mem.id,
+                    "user_id": mem.user_id,
+                    "content": mem.meta_data.get("original_content", {}),
+                    "text": mem.text,
+                    "type": mem.memory_type,
+                    "created_at": mem.created_at.isoformat() if mem.created_at else None,
+                    "meta_data": mem.meta_data
+                } for mem in memories]
+
         except Exception as e:
-            print(f"Error storing conversation: {e}")
-            return False
+            logger.error(f"Error searching memories: {e}")
+            return []
     
     async def get_user_context(self, user_id: str) -> Dict[str, Any]:
-        """Get comprehensive user context for the personal manager"""
+        """Get comprehensive user context for the personal manager - FIXED"""
         try:
             # Get recent conversation history
             conversation_history = await self.get_conversation_history(user_id, 5)
             
             # Get recent memories
-            recent_memories = await self.search_memories(user_id, limit=3)
+            recent_memories = await self.search_memories(user_id, limit=5)
             
             # Get user preferences
             preferences = await self.search_memories(user_id, "preference", limit=5)
+            
+            # Get pending tasks
+            pending_tasks = await self.get_user_tasks(user_id, status="pending")
             
             return {
                 "conversation_history": conversation_history,
                 "recent_memories": recent_memories,
                 "preferences": preferences,
+                "pending_tasks": pending_tasks,
                 "last_updated": datetime.now().isoformat()
             }
             
         except Exception as e:
-            print(f"Error getting user context: {e}")
+            logger.error(f"Error getting user context: {e}")
             return {}
+    
+    async def get_user_tasks(self, user_id: str, status: str = None, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get user tasks with optional status filter"""
+        try:
+            async with AsyncSessionLocal() as session:
+                query = select(Task).where(Task.user_id == str(user_id))
+                
+                if status:
+                    query = query.where(Task.status == status)
+                
+                query = query.order_by(desc(Task.created_at)).limit(limit)
+                
+                result = await session.execute(query)
+                tasks = result.scalars().all()
+                
+                return [{
+                    "id": task.id,
+                    "user_id": task.user_id,
+                    "task": task.text,
+                    "due_time": task.due_time.isoformat() if task.due_time else None,
+                    "status": task.status,
+                    "created_at": task.created_at.isoformat() if task.created_at else None
+                } for task in tasks]
+                
+        except Exception as e:
+            logger.error(f"Error getting user tasks: {e}")
+            return []
     
     def _content_to_text(self, content: Dict[str, Any]) -> str:
         """Convert content dictionary to searchable text"""
@@ -179,7 +206,8 @@ class MemoryService:
                     await session.commit()
                     return True
                 return False
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error deleting memory: {e}")
             return False
 
 # Global instance
