@@ -16,119 +16,138 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
         self.processing_tasks: Dict[str, asyncio.Task] = {}
-    
+        self.message_queues: Dict[str, asyncio.Queue] = {}
+        self.dispatchers: Dict[str, asyncio.Task] = {}
+
     async def connect(self, websocket: WebSocket, user_id: str):
         await websocket.accept()
         self.active_connections[user_id] = websocket
-    
+        self.message_queues[user_id] = asyncio.Queue()
+        # Start dispatcher for this user
+        self.dispatchers[user_id] = asyncio.create_task(
+            self.dispatch_messages(user_id)
+        )
+
     def disconnect(self, user_id: str):
         if user_id in self.active_connections:
             del self.active_connections[user_id]
         if user_id in self.processing_tasks:
             self.processing_tasks[user_id].cancel()
             del self.processing_tasks[user_id]
+        if user_id in self.dispatchers:
+            self.dispatchers[user_id].cancel()
+            del self.dispatchers[user_id]
+        if user_id in self.message_queues:
+            del self.message_queues[user_id]
+
+    async def dispatch_messages(self, user_id: str):
+        """Continuously send messages from the queue in order"""
+        try:
+            websocket = self.active_connections[user_id]
+            queue = self.message_queues[user_id]
+
+            while True:
+                message = await queue.get()
+                await websocket.send_json(message)
+                queue.task_done()
+
+        except Exception as e:
+            logger.error(f"Dispatcher stopped for user {user_id}: {str(e)}")
+            self.disconnect(user_id)
+
 
 manager = ConnectionManager()
 
 async def process_message_with_timeout(websocket, user_id, message, start_time):
     """Process message with proper timeout handling"""
     try:
-        # Set a timeout for the crew execution (120 seconds)
         result = await asyncio.wait_for(run_crew(message, user_id), timeout=180.0)
         end_time = time.time()
         processing_time = end_time - start_time
-        
+
         logger.info(f"Request completed in {processing_time:.2f} seconds for user {user_id}")
-        
-        # Only send success if the connection is still active
-        if user_id in manager.active_connections:
-            await websocket.send_json({
+
+        if user_id in manager.message_queues:
+            await manager.message_queues[user_id].put({
                 "reply": result,
                 "user_id": user_id,
                 "status": "success",
                 "processing_time": processing_time
             })
-        
+
         return True
-        
+
     except asyncio.TimeoutError:
         end_time = time.time()
         processing_time = end_time - start_time
         logger.error(f"Request timeout after {processing_time:.2f} seconds for user {user_id}")
-        
-        if user_id in manager.active_connections:
-            await websocket.send_json({
+
+        if user_id in manager.message_queues:
+            await manager.message_queues[user_id].put({
                 "reply": "I apologize, but the request took too long to process. Please try again with a more specific request.",
                 "user_id": user_id,
                 "status": "timeout",
                 "processing_time": processing_time
             })
-        
+
         return False
-        
+
     except Exception as e:
         end_time = time.time()
         processing_time = end_time - start_time
         logger.error(f"Error processing message for user {user_id}: {str(e)}")
         logger.error(f"Full traceback: {traceback.format_exc()}")
 
-        if user_id in manager.active_connections:
-            await websocket.send_json({
+        if user_id in manager.message_queues:
+            await manager.message_queues[user_id].put({
                 "reply": f"Sorry, I encountered an error: {str(e)}",
                 "user_id": user_id,
                 "status": "error",
                 "processing_time": processing_time
             })
-        
+
         return False
 
 @router.websocket("/ws/chat/{user_id}")
 async def chat_socket(websocket: WebSocket, user_id: str):
     await manager.connect(websocket, user_id)
-    
+
     try:
-        # Send initial ping to establish connection
+        # Initial ping
         await websocket.send_json({"type": "ping", "timestamp": time.time()})
-        
+
         while True:
             try:
-                # Wait for message with timeout (300 seconds = 5 minutes)
                 data = await asyncio.wait_for(websocket.receive_text(), timeout=300.0)
                 start_time = time.time()
-                
+
                 try:
-                    # Parse JSON if sent as JSON
                     message_data = json.loads(data)
                     message = message_data.get("message", data)
                 except json.JSONDecodeError:
-                    # If not JSON, treat as plain text
                     message = data
-                
-                # Send acknowledgment that message was received
+
+                # Acknowledge immediately
                 await websocket.send_json({
                     "status": "processing",
                     "message": "Request received, processing...",
                     "timestamp": start_time
                 })
-                
-                # Process message in background task
+
+                # Fire async task (not awaited)
                 processing_task = asyncio.create_task(
                     process_message_with_timeout(websocket, user_id, message, start_time)
                 )
                 manager.processing_tasks[user_id] = processing_task
-                
-                # Wait for the task to complete but don't block receiving new messages
-                await processing_task
-                
+
             except asyncio.TimeoutError:
-                # Send ping to keep connection alive when no messages received
                 try:
                     await websocket.send_json({"type": "ping", "timestamp": time.time()})
                     logger.debug(f"Sent ping to user {user_id}")
                 except Exception as e:
                     logger.error(f"Failed to send ping to user {user_id}: {str(e)}")
                     break
-                
+
     except WebSocketDisconnect:
         logger.info(f"WebSocket disconnected for user {user_id}")
         manager.disconnect(user_id)

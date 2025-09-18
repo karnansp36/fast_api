@@ -50,8 +50,11 @@ class PersonalManagerOrchestrator:
             response = str(result)
             
             # Store conversation in history
+            logger.info(f"Storing conversation for user={user_id}, message={message}, response={response[:50]}...")
+
             await memory_service.store_conversation(user_id, message, response, emotion)
-            
+            logger.info(f"Store conversation success=success")
+
             return response
             
         except Exception as e:
