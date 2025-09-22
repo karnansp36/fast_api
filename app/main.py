@@ -9,6 +9,8 @@ import asyncio
 import logging
 import time
 from contextlib import asynccontextmanager
+from sqlalchemy import select, text
+from app.core.models import ConversationHistory 
 
 # Configure logging
 logging.basicConfig(
@@ -21,7 +23,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
@@ -37,6 +38,9 @@ async def lifespan(app: FastAPI):
         async with AsyncSessionLocal() as session:
             await session.execute(text("SELECT 1"))
         logger.info("Database connection test successful")
+        
+        # Verify database tables are accessible and writable
+        await verify_database_tables()
         
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
@@ -54,6 +58,76 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down Personal Manager API...")
     await engine.dispose()
+
+async def verify_database_tables():
+    """Verify all required tables exist and are accessible"""
+    try:
+        
+        async with AsyncSessionLocal() as session:
+            # Check if conversation_history table exists and is accessible
+            try:
+                result = await session.execute(text("SELECT COUNT(*) FROM conversation_history"))
+                count = result.scalar()
+                logger.info(f"✅ Conversation history table accessible with {count} records")
+            except Exception as e:
+                logger.error(f"❌ Conversation history table check failed: {e}")
+                # Try to create the table if it doesn't exist
+                try:
+                    async with engine.begin() as conn:
+                        await conn.run_sync(ConversationHistory.__table__.create)
+                    logger.info("✅ Created conversation_history table")
+                except Exception as create_error:
+                    logger.error(f"❌ Failed to create conversation_history table: {create_error}")
+                    return
+            
+            # Check if we can insert a test record
+            try:
+                test_conv = ConversationHistory(
+                    user_id="system_test",
+                    message="Test message during startup",
+                    response="Test response during startup",
+                    emotion="neutral"
+                )
+                session.add(test_conv)
+                await session.commit()
+                
+                # Verify the record was inserted
+                result = await session.execute(
+                    select(ConversationHistory).where(ConversationHistory.user_id == "system_test")
+                )
+                inserted = result.scalar_one_or_none()
+                
+                if inserted:
+                    # Clean up the test record
+                    await session.delete(inserted)
+                    await session.commit()
+                    logger.info("✅ Conversation history table is writable and readable")
+                else:
+                    logger.error("❌ Failed to verify test record insertion")
+                    
+            except Exception as e:
+                logger.error(f"❌ Conversation history table write test failed: {e}")
+                # Try to rollback any partial transaction
+                try:
+                    await session.rollback()
+                except:
+                    pass
+        
+        # Verify other important tables
+        tables_to_check = ["memories", "tasks"]
+        for table_name in tables_to_check:
+            try:
+                async with AsyncSessionLocal() as session:
+                    result = await session.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+                    count = result.scalar()
+                    logger.info(f"✅ {table_name} table accessible with {count} records")
+            except Exception as e:
+                logger.error(f"❌ {table_name} table check failed: {e}")
+                
+    except Exception as e:
+        logger.error(f"❌ Database table verification failed: {e}")
+
+
 
 app = FastAPI(
     title="Personal Manager API",

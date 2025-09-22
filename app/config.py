@@ -7,7 +7,7 @@ from functools import lru_cache
 load_dotenv()
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@localhost/dbname")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://admin:kalkimaster3.6.9@localhost:5432/saas_db2")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")

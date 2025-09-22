@@ -6,7 +6,9 @@ from typing import Dict, Any
 import asyncio
 import logging
 import time
-
+from app.core.db import  AsyncSessionLocal  # Import AsyncSessionLocal
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from datetime import datetime
 logger = logging.getLogger(__name__)
 
 class PersonalManagerOrchestrator:
@@ -22,46 +24,94 @@ class PersonalManagerOrchestrator:
             logger.error(f"Failed to load personal manager agent: {e}")
             return None
     
+  # In orchestrator.py, update the process_message method:
+
+    
+    # In orchestrator.py, update the _get_user_context method and its usage:
+
     async def process_message(self, message: str, user_id: str) -> str:
-        """Process message with personal manager agent"""
+        """Process message with personal manager agent - FIXED session management"""
         if not self.agent:
             return "I'm experiencing technical difficulties. Please try again later."
         
-        # Get user context
-        context = await self._get_user_context(user_id)
-        
-        # Detect emotion
-        emotion_data = emotion_service.detect_emotion(message)
-        emotion = emotion_data.get("emotion", "neutral")
-        
-        # Create task for the personal manager
-        task = self._create_personal_manager_task(message, context, emotion)
-        
+        # Use a single session for the entire request
+        async with AsyncSessionLocal() as session:
+            try:
+                # Get user context using the same session - NOW PASSING SESSION
+                context = await self._get_user_context(session, user_id)
+                
+                # Detect emotion
+                emotion_data = emotion_service.detect_emotion(message)
+                emotion = emotion_data.get("emotion", "neutral")
+                
+                # Create task for the personal manager
+                task = self._create_personal_manager_task(message, context, emotion)
+                
+                crew = Crew(
+                    agents=[self.agent],
+                    tasks=[task],
+                    process=Process.sequential,
+                    verbose=False
+                )
+                
+                # Execute the crew
+                result = await asyncio.to_thread(crew.kickoff)
+                response = str(result)
+                
+                # Store conversation in history using the same session
+                storage_success = await memory_service.store_conversation(session, user_id, message, response, emotion)
+                
+                if storage_success:
+                    logger.info(f"✅ Conversation stored successfully for user {user_id}")
+                else:
+                    logger.warning(f"⚠️ Failed to store conversation for user {user_id}")
+                
+                return response
+                
+            except Exception as e:
+                logger.error(f"Personal manager failed: {e}")
+                await session.rollback()
+                error_response = "I apologize, but I'm having trouble processing your request right now. Could you please try again?"
+                # Try to store error conversation
+                try:
+                    await memory_service.store_conversation(session, user_id, message, error_response, "error")
+                except:
+                    pass  # Don't let storage failure break the error response
+                return error_response
+
+    async def _get_user_context(self, session: AsyncSession, user_id: str) -> Dict[str, Any]:
+        """Get comprehensive user context using provided session - UPDATED SIGNATURE"""
         try:
-            crew = Crew(
-                agents=[self.agent],
-                tasks=[task],
-                process=Process.sequential,
-                verbose=False
-            )
+            # Update all internal calls to use the passed session
+            # You'll need to update memory_service methods to accept session parameter
             
-            # Execute the crew
-            result = await asyncio.to_thread(crew.kickoff)
-            response = str(result)
+            # Get recent conversation history
+            conversation_history = await memory_service.get_conversation_history(session, user_id, 5)
             
-            # Store conversation in history
-            logger.info(f"Storing conversation for user={user_id}, message={message}, response={response[:50]}...")
-
-            await memory_service.store_conversation(user_id, message, response, emotion)
-            logger.info(f"Store conversation success=success")
-
-            return response
+            # Get recent memories
+            recent_memories = await memory_service.search_memories(session, user_id, limit=5)
+            
+            # Get user preferences
+            preferences = await memory_service.search_memories(session, user_id, "preference", limit=5)
+            
+            # Get pending tasks
+            pending_tasks = await memory_service.get_user_tasks(session, user_id, status="pending")
+            
+            return {
+                "conversation_history": conversation_history,
+                "recent_memories": recent_memories,
+                "preferences": preferences,
+                "pending_tasks": pending_tasks,
+                "last_updated": datetime.now().isoformat()
+            }
             
         except Exception as e:
-            logger.error(f"Personal manager failed: {e}")
-            # Fallback response
-            return "I apologize, but I'm having trouble processing your request right now. Could you please try again?"
-    
+            logger.error(f"Error getting user context: {e}")
+            return {}
+
+
+
+
     def _create_personal_manager_task(self, message: str, context: Dict[str, Any], emotion: str) -> Task:
         """Create task for personal manager with full context"""
         
@@ -119,10 +169,7 @@ Keep your response conversational and focused on the user's needs.""",
             expected_output="A natural, empathetic response that addresses the user's message and handles any background tasks seamlessly"
         )
     
-    async def _get_user_context(self, user_id: str) -> Dict[str, Any]:
-        """Get comprehensive user context"""
-        return await memory_service.get_user_context(user_id)
-
+    
 # Global orchestrator instance
 _orchestrator_instance = None
 
