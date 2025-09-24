@@ -57,18 +57,12 @@ async def create_reminder(task: str, time: str = None, user_id: str = "default",
             await db.rollback()
         return {"error": f"Failed to create reminder: {str(e)}"}
 
-async def get_user_reminders(user_id: str, db: AsyncSession = None) -> List[Dict[str, Any]]:
+async def get_user_reminders(user_id: str) -> List[Dict[str, Any]]:
     """Get all reminders for a user from DB"""
     try:
-        if not db:
-            from app.core.db import AsyncSessionLocal
-            async with AsyncSessionLocal() as local_db:
-                result = await local_db.execute(
-                    select(Task).where(Task.user_id == user_id).order_by(desc(Task.created_at))
-                )
-                tasks = result.scalars().all()
-        else:
-            result = await db.execute(
+        from app.core.db import AsyncSessionLocal
+        async with AsyncSessionLocal() as local_db:
+            result = await local_db.execute(
                 select(Task).where(Task.user_id == user_id).order_by(desc(Task.created_at))
             )
             tasks = result.scalars().all()

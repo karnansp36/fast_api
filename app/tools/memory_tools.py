@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 from app.services.memory_service import memory_service
+from app.core.db import AsyncSessionLocal # Import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -60,14 +61,17 @@ class StoreMemoryTool(BaseTool):
                 "source": "user_input"
             }
             
-            result = loop.run_until_complete(
-                memory_service.store_memory(
-                    user_id, 
-                    memory_type, 
-                    content,
-                    meta_data={"tags": tags}
-                )
-            )
+            async def _store_memory_async():
+                async with AsyncSessionLocal() as session:
+                    return await memory_service.store_memory(
+                        session,
+                        user_id,
+                        memory_type,
+                        content,
+                        meta_data={"tags": tags}
+                    )
+
+            result = loop.run_until_complete(_store_memory_async())
             
             return result
             
@@ -111,9 +115,11 @@ class SearchMemoryTool(BaseTool):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 
-            memories = loop.run_until_complete(
-                memory_service.search_memories(user_id, memory_type, query, 5)
-            )
+            async def _search_memories_async():
+                async with AsyncSessionLocal() as session:
+                    return await memory_service.search_memories(session, user_id, memory_type, query, 5)
+
+            memories = loop.run_until_complete(_search_memories_async())
             
             if memories:
                 memory_texts = [mem["text"] for mem in memories[:3]]

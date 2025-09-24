@@ -22,6 +22,7 @@ celery.conf.update(
     result_serializer='json',
     timezone='UTC',
     enable_utc=True,
+    imports=('app.celery_worker',),
     beat_schedule={
         'process-queued-tasks-every-minute': {
             'task': 'app.celery_worker.process_queued_tasks',
@@ -71,19 +72,28 @@ def delegate_to_agent(agent_type, user_id, message, action):
             logger.info(f"Memory agent completed: {result[:100]}...")
             return str(result)
                 
-        elif agent_type == "emotion_agent":
-            from app.crew.agents.emotion import emotion_agent
-            from app.crew.tasks import create_emotion_task
-            
-            task_desc = create_emotion_task(message)
-            crew = Crew(agents=[emotion_agent], tasks=[task_desc], process=Process.sequential)
-            result = crew.kickoff()
-            logger.info(f"Emotion agent completed: {result[:100]}...")
-            return str(result)
             
     except Exception as e:
         logger.error(f"Background task failed for {agent_type}: {e}")
         return f"Error: {str(e)}"
+
+@celery.task(name='app.celery_worker.create_reminder_task')
+def create_reminder_task(task_text: str, time_str: str, user_id: str):
+    """Celery task to create a reminder in the background."""
+    from app.services.reminders import create_reminder
+    from app.core.db import AsyncSessionLocal
+    logger.info(f"Celery task: Creating reminder for user {user_id}: {task_text[:50]}...")
+    
+    async def run_create_reminder():
+        async with AsyncSessionLocal() as db:
+            result = await create_reminder(task_text, time_str, user_id, db)
+            if "error" in result:
+                logger.error(f"Celery task failed to create reminder: {result['error']}")
+            else:
+                logger.info(f"Celery task successfully created reminder: {result['task']}")
+        return result
+
+    return asyncio.run(run_create_reminder())
 
 @celery.task
 def process_queued_tasks():

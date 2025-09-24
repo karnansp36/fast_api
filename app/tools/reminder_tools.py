@@ -2,9 +2,8 @@
 from crewai.tools import BaseTool
 from typing import Type
 from pydantic import BaseModel, Field
-from app.services.reminders import create_reminder, get_user_reminders
-from app.core.db import AsyncSessionLocal
-import asyncio
+from app.services.reminders import get_user_reminders
+from app.tools.async_delegation_tool import AsyncDelegationTool
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,16 +20,9 @@ class CreateReminderTool(BaseTool):
     args_schema: Type[BaseModel] = CreateReminderInput
 
     def _run(self, task: str, time: str = "now", user_id: str = "default") -> str:
-        """Create a reminder synchronously"""
+        """Delegate reminder creation for background processing"""
         try:
             # Clean inputs
-            if isinstance(task, dict):
-                task = str(task.get('description', ''))
-            if isinstance(time, dict):
-                time = str(time.get('description', 'now'))
-            if isinstance(user_id, dict):
-                user_id = str(user_id.get('description', 'default'))
-                
             task = str(task).strip()
             time = str(time).strip()
             user_id = str(user_id).strip()
@@ -38,29 +30,22 @@ class CreateReminderTool(BaseTool):
             if not task:
                 return "Error: No task provided"
             
-            logger.info(f"Creating reminder for user {user_id}: {task[:50]}...")
+            logger.info(f"Delegating reminder creation for user {user_id}: {task[:50]}...")
             
-            # Create new event loop if none exists
-            try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+            # Delegate to AsyncDelegationTool
+            delegation_tool = AsyncDelegationTool()
+            result = delegation_tool._run(
+                agent_type="reminder_agent",
+                user_id=user_id,
+                message=task,
+                action="create",
+                time=time
+            )
             
-            # Create reminder
-            async def create_reminder_async():
-                async with AsyncSessionLocal() as db:
-                    return await create_reminder(task, time, user_id, db)
-            
-            result = loop.run_until_complete(create_reminder_async())
-            
-            if "error" in result:
-                return f"Error creating reminder: {result['error']}"
-            else:
-                return f"Reminder created: {result['task']} (scheduled for {result['time']})"
+            return result
                 
         except Exception as e:
-            error_msg = f"Failed to create reminder: {str(e)}"
+            error_msg = f"Failed to delegate reminder creation: {str(e)}"
             logger.error(error_msg)
             return error_msg
 
@@ -84,6 +69,11 @@ class GetRemindersTool(BaseTool):
             
             logger.info(f"Getting reminders for user {user_id}")
             
+            # Get reminders - relying on get_user_reminders to handle its own session
+            # This is a synchronous call to an async function, which is generally not ideal.
+            # For a proper async setup, this would also be delegated via Celery.
+            # However, for now, we'll keep it functional.
+            
             # Create new event loop if none exists
             try:
                 loop = asyncio.get_event_loop()
@@ -91,10 +81,9 @@ class GetRemindersTool(BaseTool):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # Get reminders
             async def get_reminders_async():
-                async with AsyncSessionLocal() as db:
-                    return await get_user_reminders(user_id, db)
+                # get_user_reminders can handle session internally if not provided
+                return await get_user_reminders(user_id)
             
             reminders = loop.run_until_complete(get_reminders_async())
             

@@ -1234,3 +1234,467 @@ LiteLLM completion() model= gemini-2.0-flash; provider = gemini
 2025-09-22 23:51:59,618 - app.api.websocket_routes - INFO - Request completed in 43.34 seconds for user test_user_124
 2025-09-22 23:52:24,526 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
 2025-09-22 23:52:24,625 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-23 00:17:57,543 - app.main - INFO - Starting Personal Manager API...
+2025-09-23 00:17:57,576 - app.main - INFO - Database tables created/verified
+2025-09-23 00:17:57,578 - app.main - INFO - Database connection test successful
+2025-09-23 00:17:57,579 - app.main - INFO - ✅ Conversation history table accessible with 7 records
+2025-09-23 00:17:57,586 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-23 00:17:57,587 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-23 00:17:57,589 - app.main - INFO - ✅ tasks table accessible with 0 records
+2025-09-23 00:17:57,589 - app.main - INFO - Emotion service initialized
+2025-09-23 00:19:11,489 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-23 00:19:11,561 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-23 00:19:56,819 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-23 00:20:47,836 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-23 00:21:52,071 - app.crew.orchestrator - ERROR - Personal manager failed: Task execution failed: litellm.APIConnectionError: GeminiException - [Errno 101] Network is unreachable
+2025-09-23 00:21:52,075 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: hi, i am karnan...
+2025-09-23 00:21:52,075 - app.api.websocket_routes - INFO - Request completed in 160.63 seconds for user test_user_124
+2025-09-24 22:04:36,679 - app.main - INFO - Starting Personal Manager API...
+2025-09-24 22:04:36,734 - app.main - INFO - Database tables created/verified
+2025-09-24 22:04:36,736 - app.main - INFO - Database connection test successful
+2025-09-24 22:04:36,740 - app.main - INFO - ✅ Conversation history table accessible with 8 records
+2025-09-24 22:04:36,748 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-24 22:04:36,750 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-24 22:04:36,752 - app.main - INFO - ✅ tasks table accessible with 0 records
+2025-09-24 22:04:36,753 - app.main - ERROR - Emotion service initialization failed: No module named 'app.services.emotion_service'
+2025-09-24 22:05:06,974 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:05:07,012 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:09,879 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:09,881 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:09,900 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:05:09,901 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:05:09,901 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:05:09,901 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:05:09,902 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:11,070 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:11,073 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:11,075 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:05:11,076 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:05:11,076 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:05:11,076 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:05:11,077 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:12,269 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:12,270 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:12,277 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: hi...
+2025-09-24 22:05:12,277 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:05:12,277 - app.api.websocket_routes - INFO - Request completed in 5.55 seconds for user test_user_124
+2025-09-24 22:05:24,034 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:05:24,065 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:26,868 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:26,869 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:26,871 - app.tools.memory_tools - INFO - Searching memories for user user with query: django
+2025-09-24 22:05:26,872 - app.tools.memory_tools - ERROR - Failed to search memory: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:05:26,872 - app.tools.memory_tools - INFO - Searching memories for user user with query: django
+2025-09-24 22:05:26,872 - app.tools.memory_tools - ERROR - Failed to search memory: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:05:26,873 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:27,667 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:27,668 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:27,678 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:29,466 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:29,467 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:29,469 - app.tools.memory_tools - INFO - Searching memories for user unknown with query: django
+2025-09-24 22:05:29,470 - app.tools.memory_tools - ERROR - Failed to search memory: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:05:29,471 - app.tools.memory_tools - INFO - Searching memories for user unknown with query: django
+2025-09-24 22:05:29,471 - app.tools.memory_tools - ERROR - Failed to search memory: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:05:29,472 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:30,667 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:30,668 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:30,670 - app.tools.memory_tools - INFO - Storing memory for user unknown (type: episodic): User asked about Django...
+2025-09-24 22:05:30,671 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:05:30,671 - app.tools.memory_tools - INFO - Storing memory for user unknown (type: episodic): User asked about Django...
+2025-09-24 22:05:30,671 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:05:30,680 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:32,090 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:32,091 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:32,093 - app.tools.async_delegation_tool - INFO - Delegating to InformationRetriever for user unknown: What is Django?...
+2025-09-24 22:05:32,094 - app.tools.async_delegation_tool - INFO - Delegating to InformationRetriever for user unknown: What is Django?...
+2025-09-24 22:05:32,095 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:33,465 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:33,467 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:33,468 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:05:34,666 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:05:34,667 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:05:34,675 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: what is django...
+2025-09-24 22:05:34,676 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:05:34,676 - app.api.websocket_routes - INFO - Request completed in 10.64 seconds for user test_user_124
+2025-09-24 22:07:44,549 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-24 22:07:44,650 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-24 22:08:03,514 - app.main - INFO - Starting Personal Manager API...
+2025-09-24 22:08:03,546 - app.main - INFO - Database tables created/verified
+2025-09-24 22:08:03,547 - app.main - INFO - Database connection test successful
+2025-09-24 22:08:03,549 - app.main - INFO - ✅ Conversation history table accessible with 10 records
+2025-09-24 22:08:03,557 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-24 22:08:03,558 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-24 22:08:03,560 - app.main - INFO - ✅ tasks table accessible with 0 records
+2025-09-24 22:08:03,561 - app.main - ERROR - Emotion service initialization failed: No module named 'app.services.emotion_service'
+2025-09-24 22:08:06,662 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:08:06,699 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:09,465 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:09,467 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:09,469 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:08:09,472 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:08:09,472 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:08:09,472 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:08:09,473 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:10,485 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:10,486 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:10,487 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:11,570 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:11,572 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:11,578 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: hi...
+2025-09-24 22:08:11,578 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:08:11,579 - app.api.websocket_routes - INFO - Request completed in 5.03 seconds for user test_user_124
+2025-09-24 22:08:17,274 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:08:17,306 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:19,869 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:19,870 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:19,872 - app.tools.memory_tools - INFO - Searching memories for user user with query: Flask
+2025-09-24 22:08:19,872 - app.tools.memory_tools - ERROR - Failed to search memory: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:08:19,873 - app.tools.memory_tools - INFO - Searching memories for user user with query: Flask
+2025-09-24 22:08:19,873 - app.tools.memory_tools - ERROR - Failed to search memory: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:08:19,874 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:21,165 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:21,166 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:21,167 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:22,491 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:22,492 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:22,500 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: what is flask...
+2025-09-24 22:08:22,500 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:08:22,501 - app.api.websocket_routes - INFO - Request completed in 5.23 seconds for user test_user_124
+2025-09-24 22:08:40,794 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:08:40,826 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:42,365 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:42,372 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:42,374 - app.tools.reminder_tools - INFO - Creating reminder for user user123: reading book...
+2025-09-24 22:08:42,402 - app.tools.reminder_tools - INFO - Creating reminder for user user123: reading book...
+2025-09-24 22:08:42,406 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:43,371 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:43,373 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:43,374 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:08:44,465 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:08:44,466 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:08:44,474 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: remaind me at 2pm for reading book...
+2025-09-24 22:08:44,474 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:08:44,474 - app.api.websocket_routes - INFO - Request completed in 3.68 seconds for user test_user_124
+2025-09-24 22:12:43,339 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-24 22:12:43,440 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-24 22:12:43,441 - sqlalchemy.pool.impl.AsyncAdaptedQueuePool - ERROR - Exception closing connection <AdaptedConnection <asyncpg.connection.Connection object at 0x7fc0dc61c8b0>>
+Traceback (most recent call last):
+  File "/mnt/g/Full Stack/Ai/final_saas/fastapi/env/lib/python3.10/site-packages/sqlalchemy/pool/base.py", line 374, in _close_connection
+    self._dialect.do_close(connection)
+  File "/mnt/g/Full Stack/Ai/final_saas/fastapi/env/lib/python3.10/site-packages/sqlalchemy/engine/default.py", line 720, in do_close
+    dbapi_connection.close()
+  File "/mnt/g/Full Stack/Ai/final_saas/fastapi/env/lib/python3.10/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 898, in close
+    self.await_(self._connection.close())
+  File "/mnt/g/Full Stack/Ai/final_saas/fastapi/env/lib/python3.10/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+  File "/mnt/g/Full Stack/Ai/final_saas/fastapi/env/lib/python3.10/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+  File "/mnt/g/Full Stack/Ai/final_saas/fastapi/env/lib/python3.10/site-packages/asyncpg/connection.py", line 1504, in close
+    await self._protocol.close(timeout)
+  File "asyncpg/protocol/protocol.pyx", line 642, in close
+RuntimeError: Task <Task pending name='Task-2' coro=<LifespanOn.main() running at /mnt/g/Full Stack/Ai/final_saas/fastapi/env/lib/python3.10/site-packages/uvicorn/lifespan/on.py:86>> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+2025-09-24 22:13:03,666 - app.main - INFO - Starting Personal Manager API...
+2025-09-24 22:13:03,698 - app.main - INFO - Database tables created/verified
+2025-09-24 22:13:03,700 - app.main - INFO - Database connection test successful
+2025-09-24 22:13:03,701 - app.main - INFO - ✅ Conversation history table accessible with 13 records
+2025-09-24 22:13:03,710 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-24 22:13:03,711 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-24 22:13:03,712 - app.main - INFO - ✅ tasks table accessible with 2 records
+2025-09-24 22:13:03,713 - app.main - ERROR - Emotion service initialization failed: No module named 'app.services.emotion_service'
+2025-09-24 22:14:07,533 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-24 22:14:25,670 - app.main - INFO - Starting Personal Manager API...
+2025-09-24 22:14:25,700 - app.main - INFO - Database tables created/verified
+2025-09-24 22:14:25,702 - app.main - INFO - Database connection test successful
+2025-09-24 22:14:25,703 - app.main - INFO - ✅ Conversation history table accessible with 13 records
+2025-09-24 22:14:25,711 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-24 22:14:25,713 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-24 22:14:25,714 - app.main - INFO - ✅ tasks table accessible with 2 records
+2025-09-24 22:14:25,715 - app.main - ERROR - Emotion service initialization failed: No module named 'app.services.emotion_service'
+2025-09-24 22:21:08,191 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-24 22:21:32,816 - app.main - INFO - Starting Personal Manager API...
+2025-09-24 22:21:32,851 - app.main - INFO - Database tables created/verified
+2025-09-24 22:21:32,853 - app.main - INFO - Database connection test successful
+2025-09-24 22:21:32,854 - app.main - INFO - ✅ Conversation history table accessible with 13 records
+2025-09-24 22:21:32,862 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-24 22:21:32,863 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-24 22:21:32,864 - app.main - INFO - ✅ tasks table accessible with 2 records
+2025-09-24 22:21:32,865 - app.main - ERROR - Emotion service initialization failed: No module named 'app.services.emotion_service'
+2025-09-24 22:30:20,643 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:30:20,680 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:30:22,916 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:30:22,918 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:30:22,921 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:30:22,924 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:30:22,924 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:30:22,924 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:30:22,925 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:30:24,337 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:30:24,338 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:30:24,339 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:30:25,794 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:30:25,795 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:30:25,802 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: hi...
+2025-09-24 22:30:25,802 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:30:25,802 - app.api.websocket_routes - INFO - Request completed in 5.75 seconds for user test_user_124
+2025-09-24 22:31:16,154 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:31:16,186 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:31:19,074 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:31:19,075 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:31:19,077 - app.tools.reminder_tools - INFO - Delegating reminder creation for user user123: watch interstellar movies...
+2025-09-24 22:31:19,077 - app.tools.async_delegation_tool - INFO - Delegating to reminder_agent for user user123: watch interstellar movies...
+2025-09-24 22:31:19,333 - app.tools.reminder_tools - INFO - Delegating reminder creation for user user123: watch interstellar movies...
+2025-09-24 22:31:19,333 - app.tools.async_delegation_tool - INFO - Delegating to reminder_agent for user user123: watch interstellar movies...
+2025-09-24 22:31:19,335 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:31:20,668 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:31:20,670 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:31:20,671 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:31:22,269 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:31:22,270 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:31:22,277 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: remaind me at 24.9.2025 10 30pm to watch interstel...
+2025-09-24 22:31:22,277 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:31:22,278 - app.api.websocket_routes - INFO - Request completed in 6.13 seconds for user test_user_124
+2025-09-24 22:36:00,614 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-24 22:36:00,715 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-24 22:36:19,017 - app.main - INFO - Starting Personal Manager API...
+2025-09-24 22:36:19,045 - app.main - INFO - Database tables created/verified
+2025-09-24 22:36:19,046 - app.main - INFO - Database connection test successful
+2025-09-24 22:36:19,048 - app.main - INFO - ✅ Conversation history table accessible with 15 records
+2025-09-24 22:36:19,057 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-24 22:36:19,058 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-24 22:36:19,059 - app.main - INFO - ✅ tasks table accessible with 2 records
+2025-09-24 22:36:19,060 - app.main - ERROR - Emotion service initialization failed: No module named 'app.services.emotion_service'
+2025-09-24 22:38:32,700 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:38:32,736 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:38:36,640 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:38:36,642 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:38:36,646 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:38:36,646 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:38:36,646 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:38:36,646 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:38:36,647 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:38:37,838 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:38:37,839 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:38:37,841 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:38:39,484 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:38:39,544 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:38:39,551 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: hi...
+2025-09-24 22:38:39,551 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:38:39,552 - app.api.websocket_routes - INFO - Request completed in 7.41 seconds for user test_user_124
+2025-09-24 22:39:29,186 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:39:29,218 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:39:32,538 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:39:32,540 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:39:32,542 - app.tools.reminder_tools - INFO - Delegating reminder creation for user user: watch interstellar movies...
+2025-09-24 22:39:32,542 - app.tools.async_delegation_tool - INFO - Delegating to reminder_agent for user user: watch interstellar movies...
+2025-09-24 22:39:32,792 - app.tools.reminder_tools - INFO - Delegating reminder creation for user user: watch interstellar movies...
+2025-09-24 22:39:32,792 - app.tools.async_delegation_tool - INFO - Delegating to reminder_agent for user user: watch interstellar movies...
+2025-09-24 22:39:32,794 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:39:34,738 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:39:34,739 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:39:34,740 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:39:36,651 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:39:36,652 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:39:36,660 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: remaind me at 34.9.35 10 30 pm to watch interstell...
+2025-09-24 22:39:36,660 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:39:36,661 - app.api.websocket_routes - INFO - Request completed in 7.48 seconds for user test_user_124
+2025-09-24 22:46:00,150 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-24 22:46:00,251 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-24 22:46:18,103 - app.main - INFO - Starting Personal Manager API...
+2025-09-24 22:46:18,133 - app.main - INFO - Database tables created/verified
+2025-09-24 22:46:18,134 - app.main - INFO - Database connection test successful
+2025-09-24 22:46:18,136 - app.main - INFO - ✅ Conversation history table accessible with 17 records
+2025-09-24 22:46:18,145 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-24 22:46:18,147 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-24 22:46:18,148 - app.main - INFO - ✅ tasks table accessible with 2 records
+2025-09-24 22:46:18,149 - app.main - ERROR - Emotion service initialization failed: No module named 'app.services.emotion_service'
+2025-09-24 22:46:47,079 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:46:47,114 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:46:49,355 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:46:49,358 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:46:49,361 - app.tools.reminder_tools - INFO - Delegating reminder creation for user user123: eat lunch...
+2025-09-24 22:46:49,361 - app.tools.async_delegation_tool - INFO - Delegating to reminder_agent for user user123: eat lunch...
+2025-09-24 22:46:49,616 - app.tools.reminder_tools - INFO - Delegating reminder creation for user user123: eat lunch...
+2025-09-24 22:46:49,617 - app.tools.async_delegation_tool - INFO - Delegating to reminder_agent for user user123: eat lunch...
+2025-09-24 22:46:49,619 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:46:51,102 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:46:51,103 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:46:51,105 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:46:53,352 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:46:53,354 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:46:53,362 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: reamind me 2 pm to eat lunch...
+2025-09-24 22:46:53,362 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:46:53,362 - app.api.websocket_routes - INFO - Request completed in 6.83 seconds for user test_user_124
+2025-09-24 22:49:29,438 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-24 22:49:29,539 - app.main - INFO - Shutting down Personal Manager API...
+2025-09-24 22:49:47,442 - app.main - INFO - Starting Personal Manager API...
+2025-09-24 22:49:47,471 - app.main - INFO - Database tables created/verified
+2025-09-24 22:49:47,472 - app.main - INFO - Database connection test successful
+2025-09-24 22:49:47,474 - app.main - INFO - ✅ Conversation history table accessible with 18 records
+2025-09-24 22:49:47,483 - app.main - INFO - ✅ Conversation history table is writable and readable
+2025-09-24 22:49:47,484 - app.main - INFO - ✅ memories table accessible with 0 records
+2025-09-24 22:49:47,485 - app.main - INFO - ✅ tasks table accessible with 2 records
+2025-09-24 22:49:47,486 - app.main - ERROR - Emotion service initialization failed: No module named 'app.services.emotion_service'
+2025-09-24 22:54:52,319 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:54:52,356 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:54:56,513 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:54:56,515 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:54:56,518 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:54:56,519 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:54:56,519 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 22:54:56,519 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 22:54:56,520 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:54:57,736 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:54:57,737 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:54:57,739 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:54:59,298 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:54:59,300 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:54:59,308 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: hi...
+2025-09-24 22:54:59,308 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:54:59,308 - app.api.websocket_routes - INFO - Request completed in 7.54 seconds for user test_user_124
+2025-09-24 22:55:24,490 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 22:55:24,521 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:55:27,937 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:55:27,939 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:55:27,941 - app.tools.reminder_tools - INFO - Delegating reminder creation for user user123: eat launch...
+2025-09-24 22:55:27,942 - app.tools.async_delegation_tool - INFO - Delegating to reminder_agent for user user123: eat launch...
+2025-09-24 22:55:28,204 - app.tools.reminder_tools - INFO - Delegating reminder creation for user user123: eat launch...
+2025-09-24 22:55:28,204 - app.tools.async_delegation_tool - INFO - Delegating to reminder_agent for user user123: eat launch...
+2025-09-24 22:55:28,207 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:55:29,337 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:55:29,338 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:55:29,339 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 22:55:31,238 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 22:55:31,239 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 22:55:31,247 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: remaind me at 3pm to eat launch...
+2025-09-24 22:55:31,247 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 22:55:31,248 - app.api.websocket_routes - INFO - Request completed in 6.76 seconds for user test_user_124
+2025-09-24 23:01:51,602 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 23:01:51,633 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:02:01,978 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:02:12,017 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:02:22,039 - app.crew.orchestrator - ERROR - Personal manager failed: Task execution failed: litellm.APIConnectionError: GeminiException - [Errno -3] Temporary failure in name resolution
+2025-09-24 23:02:22,044 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: do you remember my name...
+2025-09-24 23:02:22,044 - app.api.websocket_routes - INFO - Request completed in 30.44 seconds for user test_user_124
+2025-09-24 23:08:40,720 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-24 23:09:51,922 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 23:09:51,955 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:10:01,973 - app.crew.orchestrator - ERROR - Personal manager failed: Task execution failed: litellm.APIConnectionError: GeminiException - [Errno -3] Temporary failure in name resolution
+2025-09-24 23:10:01,978 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: do you remember my name...
+2025-09-24 23:10:01,978 - app.api.websocket_routes - INFO - Request completed in 10.06 seconds for user test_user_124
+2025-09-24 23:10:18,738 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 23:10:18,768 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:10:28,789 - app.crew.orchestrator - ERROR - Personal manager failed: Task execution failed: litellm.APIConnectionError: GeminiException - [Errno -3] Temporary failure in name resolution
+2025-09-24 23:10:28,794 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: remember my name...
+2025-09-24 23:10:28,794 - app.api.websocket_routes - INFO - Request completed in 10.06 seconds for user test_user_124
+2025-09-24 23:10:40,997 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 23:10:41,029 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:10:51,051 - app.crew.orchestrator - ERROR - Personal manager failed: Task execution failed: litellm.APIConnectionError: GeminiException - [Errno -3] Temporary failure in name resolution
+2025-09-24 23:10:51,055 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: rememberemember my name . i am karnan...
+2025-09-24 23:10:51,055 - app.api.websocket_routes - INFO - Request completed in 10.18 seconds for user test_user_124
+2025-09-24 23:11:03,585 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 23:11:03,617 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:11:13,639 - app.crew.orchestrator - ERROR - Personal manager failed: Task execution failed: litellm.APIConnectionError: GeminiException - [Errno -3] Temporary failure in name resolution
+2025-09-24 23:11:13,644 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: hi...
+2025-09-24 23:11:13,644 - app.api.websocket_routes - INFO - Request completed in 10.06 seconds for user test_user_124
+2025-09-24 23:13:05,520 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-24 23:13:11,033 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 23:13:11,066 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:13:13,103 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 23:13:13,104 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 23:13:13,106 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 23:13:13,107 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 23:13:13,107 - app.tools.memory_tools - INFO - Storing memory for user user (type: episodic): User said hi...
+2025-09-24 23:13:13,107 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 23:13:13,108 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:13:14,290 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 23:13:14,291 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 23:13:14,292 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:13:15,588 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 23:13:15,589 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 23:13:15,597 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: hi...
+2025-09-24 23:13:15,597 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 23:13:15,597 - app.api.websocket_routes - INFO - Request completed in 4.57 seconds for user test_user_124
+2025-09-24 23:13:25,017 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 23:13:25,050 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:13:28,221 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 23:13:28,222 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 23:13:28,230 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: do you remember my name...
+2025-09-24 23:13:28,230 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 23:13:28,231 - app.api.websocket_routes - INFO - Request completed in 3.22 seconds for user test_user_124
+2025-09-24 23:13:41,145 - app.crew.orchestrator - ERROR - Error getting user context: 'MemoryService' object has no attribute 'search_memories'
+2025-09-24 23:13:41,178 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:13:43,079 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 23:13:43,080 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 23:13:43,082 - app.tools.memory_tools - INFO - Storing memory for user karnan (type: fact): My name is Karnan...
+2025-09-24 23:13:43,083 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 23:13:43,083 - app.tools.memory_tools - INFO - Storing memory for user karnan (type: fact): My name is Karnan...
+2025-09-24 23:13:43,083 - app.tools.memory_tools - ERROR - Failed to store memory: MemoryService.store_memory() missing 1 required positional argument: 'content'
+2025-09-24 23:13:43,084 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:13:44,493 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 23:13:44,494 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 23:13:44,496 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini-2.0-flash; provider = gemini
+2025-09-24 23:13:45,691 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyD7vUq7prvNWoMNaKvzZTgdtti0DXd0Szs "HTTP/1.1 200 OK"
+2025-09-24 23:13:45,693 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2025-09-24 23:13:45,699 - app.services.memory_service - INFO - ✅ Conversation stored for user test_user_124: remember my name . i am karnan...
+2025-09-24 23:13:45,699 - app.crew.orchestrator - INFO - ✅ Conversation stored successfully for user test_user_124
+2025-09-24 23:13:45,699 - app.api.websocket_routes - INFO - Request completed in 4.56 seconds for user test_user_124
+2025-09-24 23:19:56,661 - app.api.websocket_routes - INFO - WebSocket disconnected for user test_user_124
+2025-09-24 23:19:56,761 - app.main - INFO - Shutting down Personal Manager API...

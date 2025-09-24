@@ -27,8 +27,8 @@ try:
         llm=default_llm,
         tools=[StoreMemoryTool(), SearchMemoryTool(), CreateReminderTool(), GetRemindersTool(), AsyncDelegationTool()],
         verbose=False,
-        allow_delegation=False,
-        max_iter=3,
+        allow_delegation=True,
+        max_iter=1,
         max_execution_time=120,
     )
 except Exception as e:

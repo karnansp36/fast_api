@@ -1,7 +1,6 @@
 # crew/orchestrator.py
 from crewai import Crew, Process, Task
 from app.services.memory_service import memory_service
-from app.services.emotion_service import emotion_service
 from typing import Dict, Any
 import asyncio
 import logging
@@ -40,12 +39,8 @@ class PersonalManagerOrchestrator:
                 # Get user context using the same session - NOW PASSING SESSION
                 context = await self._get_user_context(session, user_id)
                 
-                # Detect emotion
-                emotion_data = emotion_service.detect_emotion(message)
-                emotion = emotion_data.get("emotion", "neutral")
-                
                 # Create task for the personal manager
-                task = self._create_personal_manager_task(message, context, emotion)
+                task = self._create_personal_manager_task(message, context)
                 
                 crew = Crew(
                     agents=[self.agent],
@@ -59,7 +54,7 @@ class PersonalManagerOrchestrator:
                 response = str(result)
                 
                 # Store conversation in history using the same session
-                storage_success = await memory_service.store_conversation(session, user_id, message, response, emotion)
+                storage_success = await memory_service.store_conversation(session, user_id, message, response)
                 
                 if storage_success:
                     logger.info(f"✅ Conversation stored successfully for user {user_id}")
@@ -112,7 +107,7 @@ class PersonalManagerOrchestrator:
 
 
 
-    def _create_personal_manager_task(self, message: str, context: Dict[str, Any], emotion: str) -> Task:
+    def _create_personal_manager_task(self, message: str, context: Dict[str, Any]) -> Task:
         """Create task for personal manager with full context"""
         
         # Format conversation history
@@ -138,7 +133,6 @@ class PersonalManagerOrchestrator:
 
 USER MESSAGE: {message}
 
-DETECTED EMOTION: {emotion}
 
 USER CONTEXT:
 - Conversation History:
