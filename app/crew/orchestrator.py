@@ -1,6 +1,7 @@
 # crew/orchestrator.py
 from crewai import Crew, Process, Task
 from app.services.memory_service import memory_service
+from app.crew.agents.intent_extractor import intent_extractor_agent
 from typing import Dict, Any
 import asyncio
 import logging
@@ -29,49 +30,69 @@ class PersonalManagerOrchestrator:
     # In orchestrator.py, update the _get_user_context method and its usage:
 
     async def process_message(self, message: str, user_id: str) -> str:
-        """Process message with personal manager agent - FIXED session management"""
+        """Process message with intent extraction and CrewAI agent delegation."""
         if not self.agent:
             return "I'm experiencing technical difficulties. Please try again later."
-        
+
         # Use a single session for the entire request
         async with AsyncSessionLocal() as session:
             try:
-                # Get user context using the same session - NOW PASSING SESSION
+                # 1. Extract intent and entities asynchronously
+                intent_result = await intent_extractor_agent.extract_intent(message)
+                intent = intent_result.get("intent", "conversation")
+                entities = intent_result.get("entities", {})
+                # 2. Route based on intent
+                if intent == "memory":
+                    # Store memory
+                    content = entities if entities else {"text": message}
+                    result = await memory_service.store_memory(session, user_id, "general", content)
+                    return f"I'll remember that for you. ({result})"
+                elif intent == "reminder" or intent == "task":
+                    from app.services.reminders import create_reminder
+                    task_text = entities.get("task") or entities.get("text") or message
+                    time_str = entities.get("time")
+                    result = await create_reminder(task=task_text, time=time_str, user_id=user_id, db=session)
+                    if "error" in result:
+                        return f"Sorry, I couldn't set the reminder: {result['error']}"
+                    return f"I've added that to your tasks! (Task: {result['task']})"
+                elif intent == "query":
+                    # Query memories or conversation history (future: retrieval agent)
+                    query_text = entities.get("query") or message
+                    # Try memories first
+                    memories = await memory_service.search_memories(session, user_id, query=query_text, limit=3)
+                    if memories:
+                        return f"Here's what I found: " + ", ".join([m['text'] for m in memories])
+                    # Fallback: conversation history
+                    history = await memory_service.get_conversation_history(session, user_id, 10)
+                    matches = [h for h in history if query_text.lower() in h['message'].lower() or query_text.lower() in h['response'].lower()]
+                    if matches:
+                        return f"From our past conversations: " + ", ".join([m['response'] for m in matches])
+                    return "I couldn't find that information in your records."
+                # 3. Default: normal conversation
                 context = await self._get_user_context(session, user_id)
-                
-                # Create task for the personal manager
                 task = self._create_personal_manager_task(message, context)
-                
                 crew = Crew(
                     agents=[self.agent],
                     tasks=[task],
                     process=Process.sequential,
                     verbose=False
                 )
-                
-                # Execute the crew
                 result = await asyncio.to_thread(crew.kickoff)
                 response = str(result)
-                
-                # Store conversation in history using the same session
                 storage_success = await memory_service.store_conversation(session, user_id, message, response)
-                
                 if storage_success:
                     logger.info(f"✅ Conversation stored successfully for user {user_id}")
                 else:
                     logger.warning(f"⚠️ Failed to store conversation for user {user_id}")
-                
                 return response
-                
             except Exception as e:
                 logger.error(f"Personal manager failed: {e}")
                 await session.rollback()
                 error_response = "I apologize, but I'm having trouble processing your request right now. Could you please try again?"
-                # Try to store error conversation
                 try:
                     await memory_service.store_conversation(session, user_id, message, error_response, "error")
                 except:
-                    pass  # Don't let storage failure break the error response
+                    pass
                 return error_response
 
     async def _get_user_context(self, session: AsyncSession, user_id: str) -> Dict[str, Any]:

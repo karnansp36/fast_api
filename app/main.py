@@ -47,11 +47,7 @@ async def lifespan(app: FastAPI):
         # Continue anyway - the app might work with limited functionality
     
     # Initialize services
-    try:
-        from app.services.emotion_service import emotion_service
-        logger.info("Emotion service initialized")
-    except Exception as e:
-        logger.error(f"Emotion service initialization failed: {e}")
+    # Emotion service initialization removed (not implemented)
     
     yield
     

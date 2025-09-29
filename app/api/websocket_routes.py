@@ -1,3 +1,19 @@
+# Utility function to push a message to a user via websocket (for reminders, etc.)
+async def push_message_to_user(user_id: str, message: str):
+    """
+    Push a message to the user's websocket chat, if connected.
+    """
+    if user_id in manager.message_queues:
+        await manager.message_queues[user_id].put({
+            "reply": message,
+            "user_id": user_id,
+            "status": "reminder"
+        })
+        return True
+    else:
+        # Optionally, store for later delivery or log
+        logger.warning(f"User {user_id} not connected. Could not deliver reminder: {message}")
+        return False
 # api/websocket_routes.py
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.crew.orchestrator import run_personal_manager as run_crew
