@@ -1,79 +1,20 @@
-# tools/memory_tools.py - FIXED VERSION (No Mem0)
+# tools/memory_tools.py
 from crewai.tools import BaseTool
 from typing import Type, List
 from pydantic import BaseModel, Field
 import asyncio
 import json
 import logging
+from app.services.memory_service import memory_service
+from app.core.db import AsyncSessionLocal # Import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
-
-# Import your custom memory service instead of mem0
-from typing import Dict, Any, Optional
-from datetime import datetime
-
-class SimpleMemoryService:
-    """Simple in-memory fallback service to avoid Mem0 issues"""
-    def __init__(self):
-        self.memories = {}
-    
-    async def store_memory(self, user_id: str, memory_type: str, content: Dict[str, Any], meta_data: Dict[str, Any] = None) -> str:
-        try:
-            if user_id not in self.memories:
-                self.memories[user_id] = []
-            
-            memory_entry = {
-                "text": content.get("text", str(content)),
-                "type": memory_type,
-                "content": content,
-                "meta_data": meta_data or {},
-                "timestamp": datetime.now().isoformat()
-            }
-            
-            self.memories[user_id].append(memory_entry)
-            logger.info(f"Stored memory for user {user_id}")
-            return f"Memory stored successfully: {memory_entry['text'][:50]}..."
-            
-        except Exception as e:
-            logger.error(f"Error storing memory: {e}")
-            return f"Error storing memory: {str(e)}"
-    
-    async def search_memories(self, user_id: str, memory_type: Optional[str] = None, query: str = "", limit: int = 5) -> List[Dict[str, Any]]:
-        try:
-            if user_id not in self.memories:
-                return []
-            
-            user_memories = self.memories[user_id]
-            
-            # Filter by type if specified
-            if memory_type:
-                user_memories = [mem for mem in user_memories if mem.get("type") == memory_type]
-            
-            # Search by query if provided
-            if query:
-                query_lower = query.lower()
-                filtered = []
-                for mem in user_memories:
-                    text = mem.get("text", "").lower()
-                    if query_lower in text:
-                        filtered.append(mem)
-                user_memories = filtered
-            
-            # Return recent first, limited
-            sorted_memories = sorted(user_memories, key=lambda x: x.get("timestamp", ""), reverse=True)
-            return sorted_memories[:limit]
-            
-        except Exception as e:
-            logger.error(f"Error searching memories: {e}")
-            return []
-
-# Use simple memory service to avoid Mem0 issues
-simple_memory_service = SimpleMemoryService()
 
 class StoreMemoryInput(BaseModel):
     """Input schema for StoreMemoryTool"""
     user_id: str = Field(..., description="User ID to store memory for")
     text: str = Field(..., description="Text content to store as memory")
+    memory_type: str = Field("general", description="Type of memory: general, preference, fact, episodic")
     tags: List[str] = Field(default_factory=list, description="Optional tags for the memory")
 
 class StoreMemoryTool(BaseTool):
@@ -81,14 +22,16 @@ class StoreMemoryTool(BaseTool):
     description: str = "Store user memory or important information for later retrieval"
     args_schema: Type[BaseModel] = StoreMemoryInput
     
-    def _run(self, user_id: str, text: str, tags: List[str] = None) -> str:
-        """Store memory synchronously - FIXED VERSION"""
+    def _run(self, user_id: str, text: str, memory_type: str = "general", tags: List[str] = None) -> str:
+        """Store memory synchronously"""
         try:
             # Clean and validate inputs
             if isinstance(user_id, dict):
                 user_id = str(user_id.get('description', 'default'))
             if isinstance(text, dict):
                 text = str(text.get('description', ''))
+            if isinstance(memory_type, dict):
+                memory_type = str(memory_type.get('description', 'general'))
             if isinstance(tags, dict):
                 tags_str = str(tags.get('description', ''))
                 tags = tags_str.split(',') if tags_str else []
@@ -99,9 +42,10 @@ class StoreMemoryTool(BaseTool):
             
             user_id = str(user_id).strip()
             text = str(text).strip()
+            memory_type = str(memory_type).strip()
             tags = tags or []
             
-            logger.info(f"Storing memory for user {user_id}: {text[:50]}...")
+            logger.info(f"Storing memory for user {user_id} (type: {memory_type}): {text[:50]}...")
             
             # Create new event loop if none exists
             try:
@@ -110,15 +54,24 @@ class StoreMemoryTool(BaseTool):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
             
-            # Store memory using simple service (no Mem0)
-            result = loop.run_until_complete(
-                simple_memory_service.store_memory(
-                    user_id, 
-                    "user_memory", 
-                    {"text": text, "tags": tags},
-                    meta_data={"tags": tags}
-                )
-            )
+            # Store memory using memory service
+            content = {
+                "text": text,
+                "tags": tags,
+                "source": "user_input"
+            }
+            
+            async def _store_memory_async():
+                async with AsyncSessionLocal() as session:
+                    return await memory_service.store_memory(
+                        session,
+                        user_id,
+                        memory_type,
+                        content,
+                        meta_data={"tags": tags}
+                    )
+
+            result = loop.run_until_complete(_store_memory_async())
             
             return result
             
@@ -131,23 +84,27 @@ class SearchMemoryInput(BaseModel):
     """Input schema for SearchMemoryTool"""
     user_id: str = Field(..., description="User ID to search memories for")
     query: str = Field(default="", description="Search query to find relevant memories")
+    memory_type: str = Field(None, description="Optional memory type to filter by")
 
 class SearchMemoryTool(BaseTool):
     name: str = "search_memory"
     description: str = "Search and retrieve user memories based on query"
     args_schema: Type[BaseModel] = SearchMemoryInput
     
-    def _run(self, user_id: str, query: str = "") -> str:
-        """Search memory synchronously - FIXED VERSION"""
+    def _run(self, user_id: str, query: str = "", memory_type: str = None) -> str:
+        """Search memory synchronously"""
         try:
             # Clean inputs
             if isinstance(user_id, dict):
                 user_id = str(user_id.get('description', 'default'))
             if isinstance(query, dict):
                 query = str(query.get('description', ''))
+            if isinstance(memory_type, dict):
+                memory_type = str(memory_type.get('description', ''))
                 
             user_id = str(user_id).strip()
             query = str(query).strip()
+            memory_type = str(memory_type).strip() if memory_type else None
             
             logger.info(f"Searching memories for user {user_id} with query: {query}")
             
@@ -158,13 +115,15 @@ class SearchMemoryTool(BaseTool):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 
-            memories = loop.run_until_complete(
-                simple_memory_service.search_memories(user_id, "user_memory", query, 3)
-            )
+            async def _search_memories_async():
+                async with AsyncSessionLocal() as session:
+                    return await memory_service.search_memories(session, user_id, memory_type, query, 5)
+
+            memories = loop.run_until_complete(_search_memories_async())
             
             if memories:
                 memory_texts = [mem["text"] for mem in memories[:3]]
-                result = f"Found {len(memory_texts)} memories: " + "; ".join(memory_texts[:3])
+                result = f"Found {len(memories)} memories: " + "; ".join(memory_texts[:3])
                 logger.info(f"Search successful: {len(memories)} memories found")
                 return result
             else:

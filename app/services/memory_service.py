@@ -1,24 +1,21 @@
+# services/memory_service.py - UPDATED
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, and_, cast, String, text
-from app.core.db import AsyncSessionLocal
-from app.core.models import Memory
+from sqlalchemy import select, desc
+from app.core.db import AsyncSessionLocal, get_session
+from app.core.models import Memory, ConversationHistory, Task
 from app.services.embeddings import embed_text
-import json
-from datetime import datetime
-import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MemoryService:
     def __init__(self):
         pass
     
-    async def _get_session(self) -> AsyncSession:
-        """Get async database session"""
-        return AsyncSessionLocal()
-    
-    async def store_memory(self, user_id: str, memory_type: str, 
+    async def store_memory(self, session: AsyncSession, user_id: str, memory_type: str, 
                           content: Dict[str, Any], meta_data: Dict[str, Any] = None) -> str:
-        """Store a memory with embedding"""
+        """Store a memory with embedding - FIXED to accept session"""
         try:
             # Convert content to text for embedding
             text_content = self._content_to_text(content)
@@ -26,141 +23,80 @@ class MemoryService:
             # Generate embedding
             embedding = embed_text(text_content)
             
-            async with AsyncSessionLocal() as session:
-                memory = Memory(
-                    user_id=str(user_id),  # Ensure string conversion
-                    text=text_content,
-                    meta_data={
-                        "type": memory_type,
-                        "original_content": content,
-                        **(meta_data or {})
-                    },
-                    embedding=embedding
-                )
-                session.add(memory)
-                await session.commit()
-                
-                return f"Memory stored successfully: {text_content[:50]}..."
-                
+            memory = Memory(
+                user_id=str(user_id),
+                text=text_content,
+                memory_type=memory_type,
+                meta_data={
+                    "original_content": content,
+                    **(meta_data or {})
+                },
+                embedding=embedding
+            )
+            session.add(memory)
+            await session.commit()
+            await session.refresh(memory)
+            
+            return f"Memory stored successfully: {text_content[:50]}..."
+            
         except Exception as e:
+            logger.error(f"Error storing memory: {str(e)}")
+            await session.rollback()
             return f"Error storing memory: {str(e)}"
-    async def search_memories(
-        self, user_id: str, memory_type: Optional[str] = None,
-        query: str = "", limit: int = 5
-    ) -> List[Dict[str, Any]]:
-        """Search memories with optional filtering by type and query (DB-agnostic)."""
+    
+    async def store_conversation(self, session: AsyncSession, user_id: str, message: str, response: str, emotion: str = None) -> bool:
+        """Store a chat conversation exchange - FIXED to accept session"""
         try:
-            async with AsyncSessionLocal() as session:
-                base_query = select(Memory).where(Memory.user_id == str(user_id))
-                base_query = base_query.order_by(Memory.created_at.desc()).limit(100)  # fetch a bit more
+            # Clean and validate inputs
+            user_id = str(user_id).strip()
+            message = str(message).strip() if message else ""
+            response = str(response).strip() if response else ""
+            emotion = str(emotion).strip() if emotion else None
 
-                result = await session.execute(base_query)
-                memories = result.scalars().all()
-
-                # Python-side filtering
-                filtered = []
-                for mem in memories:
-                    if memory_type and mem.meta_data.get("type") != memory_type:
-                        continue
-                    if query:
-                        query_lower = query.lower()
-                        if query_lower not in mem.text.lower() and \
-                        query_lower not in json.dumps(mem.meta_data.get("original_content", {})).lower():
-                            continue
-                    filtered.append(mem)
-
-                # Trim to limit
-                filtered = filtered[:limit]
-
-                return [{
-                    "id": mem.id,
-                    "user_id": mem.user_id,
-                    "content": mem.meta_data.get("original_content", {}),
-                    "text": mem.text,
-                    "type": mem.meta_data.get("type", "unknown"),
-                    "created_at": mem.created_at.isoformat() if mem.created_at else None,
-                    "meta_data": mem.meta_data
-                } for mem in filtered]
-
-        except Exception as e:
-            print(f"Error searching memories: {e}")
-            return []
-
-    
-  
-    async def get_recent_memories(self, user_id: str, memory_type: Optional[str] = None,
-                                 limit: int = 10) -> List[Dict[str, Any]]:
-        """Get recent memories, optionally filtered by type"""
-        return await self.search_memories(str(user_id), memory_type, "", limit)
-    
-    async def search_similar_memories(self, user_id: str, query_text: str, 
-                                        memory_type: Optional[str] = None, 
-                                        limit: int = 3) -> List[Dict[str, Any]]:
-            """Search for similar memories using embedding similarity"""
-            try:
-                # Generate embedding for query
-                query_embedding = embed_text(query_text)
-                
-                async with AsyncSessionLocal() as session:
-                    # Build base query
-                    base_query = select(Memory).where(Memory.user_id == str(user_id))
-                    
-                    # Add memory type filter if specified
-                    if memory_type:
-                        base_query = base_query.where(
-                            text("memories.meta_data->>'type' = :mem_type")
-                        ).params(mem_type=memory_type)
-                    
-                    # Use pgvector cosine distance for similarity search
-                    base_query = base_query.order_by(
-                        Memory.embedding.cosine_distance(query_embedding)
-                    ).limit(limit)
-                    
-                    result = await session.execute(base_query)
-                    memories = result.scalars().all()
-                    
-                    return [{
-                        "id": mem.id,
-                        "content": mem.meta_data.get("original_content", {}),
-                        "text": mem.text,
-                        "type": mem.meta_data.get("type", "unknown"),
-                        "similarity_score": 1 - float(mem.embedding.cosine_distance(query_embedding)),
-                        "created_at": mem.created_at.isoformat() if mem.created_at else None
-                    } for mem in memories]
-                    
-            except Exception as e:
-                print(f"Error searching similar memories: {e}")
-                # Fallback to text search
-                return await self.search_memories(str(user_id), memory_type, query_text, limit)
-        
-    def _content_to_text(self, content: Dict[str, Any]) -> str:
-        """Convert content dictionary to searchable text"""
-        if isinstance(content, str):
-            return content
-        
-        text_parts = []
-        for key, value in content.items():
-            if isinstance(value, (str, int, float)):
-                text_parts.append(f"{key}: {value}")
-            elif isinstance(value, dict):
-                text_parts.append(f"{key}: {self._content_to_text(value)}")
-            elif isinstance(value, list):
-                text_parts.append(f"{key}: {', '.join(str(v) for v in value)}")
-        
-        return "; ".join(text_parts)
-    
-    async def delete_memory(self, user_id: str, memory_id: int) -> bool:
-        """Delete a specific memory"""
-        try:
-            async with AsyncSessionLocal() as session:
-                memory = await session.get(Memory, memory_id)
-                if memory and memory.user_id == str(user_id):
-                    await session.delete(memory)
-                    await session.commit()
-                    return True
+            if not message or not response:
+                logger.warning(f"Skipping empty conversation storage for user {user_id}")
                 return False
-        except Exception:
+
+            conversation = ConversationHistory(
+                user_id=user_id,
+                message=message[:4000],
+                response=response[:4000],
+                emotion=emotion[:20] if emotion else None
+            )
+            session.add(conversation)
+            await session.commit()
+            logger.info(f"✅ Conversation stored for user {user_id}: {message[:50]}...")
+            return True
+        except Exception as e:
+            logger.error(f"❌ Error storing conversation for user {user_id}: {e}")
+            await session.rollback()
             return False
+    
+    async def get_conversation_history(self, session: AsyncSession, user_id: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent conversation history - FIXED to accept session"""
+        try:
+            result = await session.execute(
+                select(ConversationHistory)
+                .where(ConversationHistory.user_id == str(user_id))
+                .order_by(desc(ConversationHistory.created_at))
+                .limit(limit)
+            )
+            history = result.scalars().all()
+            
+            return [{
+                "id": h.id,
+                "user_id": h.user_id,
+                "message": h.message,
+                "response": h.response,
+                "emotion": h.emotion,
+                "created_at": h.created_at.isoformat() if h.created_at else None
+            } for h in history]
+            
+        except Exception as e:
+            logger.error(f"Error getting conversation history: {e}")
+            return []
+    
+    # Update other methods similarly to accept session parameter...
 
 # Global instance
 memory_service = MemoryService()

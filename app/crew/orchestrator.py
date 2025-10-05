@@ -1,374 +1,201 @@
 # crew/orchestrator.py
-from crewai import Crew, Process
-from app.crew.agents.conversation import conversation_agent
-from app.crew.agents.emotion import emotion_agent
-from app.crew.agents.memory import memory_agent
-from app.crew.agents.task import task_agent
-from app.crew.tasks import (
-    create_conversation_task, 
-    create_emotion_task, 
-    create_memory_task, 
-    create_task_management_task
-)
-from app.services.memory_service import MemoryService
-# from app.services.task_service import TaskService
+from crewai import Crew, Process, Task
+from app.services.memory_service import memory_service
+from app.crew.agents.intent_extractor import intent_extractor_agent
+from typing import Dict, Any
 import asyncio
-from typing import Dict, Any, List, Optional
-import re
 import logging
-import traceback
+import time
+from app.core.db import  AsyncSessionLocal  # Import AsyncSessionLocal
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from datetime import datetime
-
 logger = logging.getLogger(__name__)
 
-class CrewOrchestrator:
+class PersonalManagerOrchestrator:
     def __init__(self):
-        self.agents = [conversation_agent, emotion_agent, memory_agent, task_agent]
-        self.memory_service = MemoryService()
-        # self.task_service = TaskService()
-        self.conversation_context = {}
-        self.fallback_responses = [
-            "I appreciate your message. How can I help you with that?",
-            "Thank you for sharing. How can I assist you today?",
-            "I understand. What would you like me to help you with?",
-            "That's interesting. How can I be of service?",
-            "I'm here to help. What do you need assistance with?"
-        ]
+        self.agent = self._initialize_agent()
     
-    def _analyze_intent(self, message: str, user_id: str) -> Dict[str, Any]:
-        """Comprehensive intent analysis with pattern matching"""
-        message_lower = message.lower().strip()
-        
-        # Greeting patterns
-        greeting_patterns = [
-            r"^(hi|hello|hey|greetings|howdy|good\s(morning|afternoon|evening))",
-            r"^(what's up|sup|yo|hi there|hello there)",
-            r"^(how are you|how's it going|how do you do)"
-        ]
-        
-        # Memory patterns
-        memory_patterns = {
-            "memory_store": [
-                r"(remember|save|store|don't forget|note that|keep in mind|make a note)",
-                r"(my name is|call me|nickname is|i am|i'm called|my (email|phone|address) is)",
-                r"(i live in|my address is|contact me at)"
-            ],
-            "memory_search": [
-                r"(recall|what did i say|what do you remember|find|search memory|my info|my details)",
-                r"(tell me about|do you remember|have i told you|my previous messages)"
-            ]
-        }
+    def _initialize_agent(self):
+        """Initialize the personal manager agent"""
+        try:
+            from app.crew.agents.personal_manager import personal_manager_agent
+            return personal_manager_agent
+        except Exception as e:
+            logger.error(f"Failed to load personal manager agent: {e}")
+            return None
+    
+  # In orchestrator.py, update the process_message method:
 
-        # Task patterns
-        task_patterns = {
-            "task_create": [
-                r"(remind|reminder|task|schedule|todo|set a|create|add|need to|should|must|have to)",
-                r"(set alarm|create event|add to calendar|plan|organize)"
-            ],
-            "task_get": [
-                r"(my tasks|my reminders|what tasks|show tasks|list tasks|pending tasks)",
-                r"(what do i have to do|upcoming tasks|my schedule|my todos)"
-            ]
-        }
-        
-        # Emotional patterns
-        emotion_words = [
-            "sad", "happy", "angry", "excited", "worried", "stressed", 
-            "frustrated", "annoyed", "delighted", "upset", "anxious", "depressed",
-            "joy", "anger", "fear", "surprise", "love", "hate", "nervous", "calm"
-        ]
-        
-        # Question patterns
-        question_words = ["what", "when", "where", "why", "how", "who", "which", "can", "could", "would"]
-        
-        # Analyze patterns
-        intents = {
-            "type": "complex",
-            "needs_processing": True,
-            "is_greeting": any(re.search(pattern, message_lower) for pattern in greeting_patterns),
-            "memory_store": any(re.search(pattern, message_lower) for pattern in memory_patterns["memory_store"]),
-            "memory_search": any(re.search(pattern, message_lower) for pattern in memory_patterns["memory_search"]),
-            "task_create": any(re.search(pattern, message_lower) for pattern in task_patterns["task_create"]),
-            "task_get": any(re.search(pattern, message_lower) for pattern in task_patterns["task_get"]),
-            "emotional": any(word in message_lower for word in emotion_words),
-            "is_question": any(word in message_lower for word in question_words),
-            "message_length": len(message.split()),
-            "has_entities": len(message.split()) > 2
-        }
-        
-        # Determine primary intent type
-        if intents["is_greeting"]:
-            intents["type"] = "greeting"
-            intents["needs_processing"] = False
-        elif intents["memory_store"] or intents["memory_search"]:
-            intents["type"] = "memory"
-        elif intents["task_create"] or intents["task_get"]:
-            intents["type"] = "task"
-        elif intents["emotional"]:
-            intents["type"] = "emotional"
-        elif intents["is_question"]:
-            intents["type"] = "question"
-        
-        return intents
     
-    async def _get_user_context(self, user_id: str) -> Dict[str, Any]:
-        """Safely get user context with comprehensive error handling"""
-        context = {
-            "recent_conversation": [],
-            "user_info": [],
-            "pending_tasks": [],
-            "timestamp": datetime.now().isoformat()
-        }
-        
-        try:
-            # Get recent conversation history
-            try:
-                context["recent_conversation"] = await self.memory_service.search_memories(
-                    user_id, "conversation", limit=5
-                )
-            except Exception as e:
-                logger.warning(f"Could not fetch recent conversations: {e}")
-            
-            # Get user preferences and personal info
-            try:
-                context["user_info"] = await self.memory_service.search_memories(
-                    user_id, "personal_info", limit=10
-                )
-            except Exception as e:
-                logger.warning(f"Could not fetch user info: {e}")
-            
-            # Get pending tasks (commented out for now)
-            # try:
-            #     context["pending_tasks"] = await self.task_service.get_tasks(user_id, completed=False)
-            # except Exception as e:
-            #     logger.warning(f"Could not fetch tasks: {e}")
-                
-        except Exception as e:
-            logger.error(f"Error in _get_user_context: {e}")
-        
-        return context
-    
-    async def _store_conversation_memory(self, user_id: str, message: str, message_type: str) -> bool:
-        """Safely store conversation memory"""
-        try:
-            await self.memory_service.store_memory(
-                user_id, 
-                "conversation", 
-                {
-                    "message": message, 
-                    "type": message_type,
-                    "timestamp": datetime.now().isoformat()
-                },
-                meta_data={
-                    "timestamp": datetime.now().isoformat(),
-                    "sentiment": "neutral",
-                    "processed": False
-                }
-            )
-            return True
-        except Exception as e:
-            logger.error(f"Error storing {message_type} memory: {e}")
-            return False
-    
-    async def _handle_simple_greeting(self, message: str, user_id: str) -> str:
-        """Handle greeting messages with personalized response"""
-        try:
-            # Try to get user context for personalization
-            user_context = await self._get_user_context(user_id)
-            
-            # Extract user name if available
-            user_name = "there"
-            if user_context.get('user_info'):
-                for mem in user_context['user_info']:
-                    if mem.get('content', {}).get('name'):
-                        user_name = mem['content']['name']
-                        break
-            
-            # Generate appropriate greeting response
-            message_lower = message.lower()
-            
-            if "how are you" in message_lower:
-                return f"I'm doing well, thank you for asking {user_name}! How can I help you today?"
-            elif "good morning" in message_lower:
-                return f"Good morning {user_name}! How can I assist you today?"
-            elif "good afternoon" in message_lower:
-                return f"Good afternoon {user_name}! What can I help you with?"
-            elif "good evening" in message_lower:
-                return f"Good evening {user_name}! How can I be of service?"
-            else:
-                return f"Hello {user_name}! How can I help you today?"
-                
-        except Exception as e:
-            logger.error(f"Error in greeting handler: {e}")
-            return "Hello! How can I assist you today?"
-    
-    def _select_tasks_based_on_intent(self, message: str, user_id: str, intents: Dict[str, Any], context: Dict[str, Any]) -> List:
-        """Select appropriate tasks based on analyzed intents"""
-        tasks = []
-        
-        # Always add conversation task as base
-        tasks.append(create_conversation_task(message, user_id, context))
-        
-        # Add specialized tasks based on intent
-        if intents["emotional"]:
-            tasks.append(create_emotion_task(message))
-        
-        if intents["memory_store"]:
-            tasks.append(create_memory_task(message, user_id, "store"))
-        
-        if intents["memory_search"]:
-            tasks.append(create_memory_task(message, user_id, "search"))
-        
-        if intents["task_create"]:
-            tasks.append(create_task_management_task(message, user_id, "create"))
-        
-        if intents["task_get"]:
-            tasks.append(create_task_management_task(message, user_id, "get"))
-        
-        return tasks
-    
-    async def _execute_crew_processing(self, tasks: List, timeout: int = 90) -> Optional[str]:
-        """Execute crew processing with robust error handling"""
-        if not tasks:
-            return None
-            
-        try:
-            crew = Crew(
-                agents=self.agents,
-                tasks=tasks,
-                process=Process.sequential,
-                verbose=True,
-                max_rpm=5,
-                memory=False   
-            )
-            
-            result = await asyncio.wait_for(
-                asyncio.to_thread(crew.kickoff),
-                timeout=timeout
-            )
-            
-            return str(result.raw) if hasattr(result, 'raw') else str(result)
-            
-        except asyncio.TimeoutError:
-            logger.warning("Crew processing timeout")
-            return "I apologize, but the request took too long to process. Please try again with a simpler question."
-        except Exception as crew_error:
-            logger.error(f"Crew processing error: {crew_error}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return None
-    
-    async def _handle_with_conversation_agent_only(self, message: str, user_id: str, context: Dict[str, Any]) -> str:
-        """Handle message using just the conversation agent"""
-        try:
-            conversation_task = create_conversation_task(message, user_id, context)
-            
-            mini_crew = Crew(
-                agents=[conversation_agent],
-                tasks=[conversation_task],
-                process=Process.sequential,
-                verbose=False,
-                memory=False   
-            )
-            
-            result = await asyncio.wait_for(
-                asyncio.to_thread(mini_crew.kickoff),
-                timeout=30
-            )
-            
-            return str(result.raw) if hasattr(result, 'raw') else str(result)
-            
-        except Exception as e:
-            logger.error(f"Error in conversation-only agent: {e}")
-            return self._generate_fallback_response(message)
-    
-    def _generate_fallback_response(self, message: str) -> str:
-        """Generate intelligent fallback responses based on message content"""
-        message_lower = message.lower()
-        
-        # Question patterns
-        if any(word in message_lower for word in ["what", "when", "where", "why", "how", "who"]):
-            return "That's an interesting question. I'd be happy to help you with that. Could you provide a bit more context?"
-        
-        # Request patterns
-        if any(word in message_lower for word in ["can you", "could you", "would you", "please"]):
-            return "I'd be glad to help with that. Please tell me more about what you need."
-        
-        # Emotional content
-        emotion_words = ["sad", "happy", "angry", "worried", "excited", "frustrated"]
-        if any(word in message_lower for word in emotion_words):
-            return "I understand this might be important to you. Let me help you work through this."
-        
-        # Long messages
-        if len(message.split()) > 8:
-            return "Thank you for sharing that with me. I understand what you're saying. How can I best assist you with this?"
-        
-        # Default engaging response
-        return self.fallback_responses[len(message) % len(self.fallback_responses)]
-    
+    # In orchestrator.py, update the _get_user_context method and its usage:
+
     async def process_message(self, message: str, user_id: str) -> str:
-        """Main message processing pipeline with comprehensive error handling"""
-        if not message or not message.strip():
-            return "I didn't receive your message. Could you please try again?"
-        
-        try:
-            # Step 1: Analyze intent
-            intents = self._analyze_intent(message, user_id)
-            logger.info(f"Message: '{message}' | Intents: {intents}")
-            
-            # Step 2: Handle simple greetings without full processing
-            if intents["type"] == "greeting":
-                response = await self._handle_simple_greeting(message, user_id)
-                # Still try to store the greeting for context
-                await self._store_conversation_memory(user_id, message, "user_input")
-                await self._store_conversation_memory(user_id, response, "assistant_response")
+        """Process message with intent extraction and CrewAI agent delegation."""
+        if not self.agent:
+            return "I'm experiencing technical difficulties. Please try again later."
+
+        # Use a single session for the entire request
+        async with AsyncSessionLocal() as session:
+            try:
+                # 1. Extract intent and entities asynchronously
+                intent_result = await intent_extractor_agent.extract_intent(message)
+                intent = intent_result.get("intent", "conversation")
+                entities = intent_result.get("entities", {})
+                # 2. Route based on intent
+                if intent == "memory":
+                    # Store memory
+                    content = entities if entities else {"text": message}
+                    result = await memory_service.store_memory(session, user_id, "general", content)
+                    return f"I'll remember that for you. ({result})"
+                elif intent == "reminder" or intent == "task":
+                    from app.services.reminders import create_reminder
+                    task_text = entities.get("task") or entities.get("text") or message
+                    time_str = entities.get("time")
+                    result = await create_reminder(task=task_text, time=time_str, user_id=user_id, db=session)
+                    if "error" in result:
+                        return f"Sorry, I couldn't set the reminder: {result['error']}"
+                    return f"I've added that to your tasks! (Task: {result['task']})"
+                elif intent == "query":
+                    # Query memories or conversation history (future: retrieval agent)
+                    query_text = entities.get("query") or message
+                    # Try memories first
+                    memories = await memory_service.search_memories(session, user_id, query=query_text, limit=3)
+                    if memories:
+                        return f"Here's what I found: " + ", ".join([m['text'] for m in memories])
+                    # Fallback: conversation history
+                    history = await memory_service.get_conversation_history(session, user_id, 10)
+                    matches = [h for h in history if query_text.lower() in h['message'].lower() or query_text.lower() in h['response'].lower()]
+                    if matches:
+                        return f"From our past conversations: " + ", ".join([m['response'] for m in matches])
+                    return "I couldn't find that information in your records."
+                # 3. Default: normal conversation
+                context = await self._get_user_context(session, user_id)
+                task = self._create_personal_manager_task(message, context)
+                crew = Crew(
+                    agents=[self.agent],
+                    tasks=[task],
+                    process=Process.sequential,
+                    verbose=False
+                )
+                result = await asyncio.to_thread(crew.kickoff)
+                response = str(result)
+                storage_success = await memory_service.store_conversation(session, user_id, message, response)
+                if storage_success:
+                    logger.info(f"✅ Conversation stored successfully for user {user_id}")
+                else:
+                    logger.warning(f"⚠️ Failed to store conversation for user {user_id}")
                 return response
+            except Exception as e:
+                logger.error(f"Personal manager failed: {e}")
+                await session.rollback()
+                error_response = "I apologize, but I'm having trouble processing your request right now. Could you please try again?"
+                try:
+                    await memory_service.store_conversation(session, user_id, message, error_response, "error")
+                except:
+                    pass
+                return error_response
+
+    async def _get_user_context(self, session: AsyncSession, user_id: str) -> Dict[str, Any]:
+        """Get comprehensive user context using provided session - UPDATED SIGNATURE"""
+        try:
+            # Update all internal calls to use the passed session
+            # You'll need to update memory_service methods to accept session parameter
             
-            # Step 3: Get user context
-            user_context = await self._get_user_context(user_id)
+            # Get recent conversation history
+            conversation_history = await memory_service.get_conversation_history(session, user_id, 5)
             
-            # Step 4: Store user input (with error tolerance)
-            await self._store_conversation_memory(user_id, message, "user_input")
+            # Get recent memories
+            recent_memories = await memory_service.search_memories(session, user_id, limit=5)
             
-            # Step 5: Select appropriate tasks
-            tasks = self._select_tasks_based_on_intent(message, user_id, intents, user_context)
+            # Get user preferences
+            preferences = await memory_service.search_memories(session, user_id, "preference", limit=5)
             
-            # Step 6: Process with appropriate strategy
-            final_response = None
+            # Get pending tasks
+            pending_tasks = await memory_service.get_user_tasks(session, user_id, status="pending")
             
-            # Use full crew for complex messages or multiple intents
-            if len(tasks) > 1 or (intents["is_question"] and intents["message_length"] > 5):
-                final_response = await self._execute_crew_processing(tasks)
-            
-            # Fallback to conversation agent if crew failed or for simple messages
-            if not final_response:
-                final_response = await self._handle_with_conversation_agent_only(message, user_id, user_context)
-            
-            # Final fallback if everything else fails
-            if not final_response:
-                final_response = self._generate_fallback_response(message)
-            
-            # Step 7: Store assistant response
-            await self._store_conversation_memory(user_id, final_response, "assistant_response")
-            
-            return final_response
+            return {
+                "conversation_history": conversation_history,
+                "recent_memories": recent_memories,
+                "preferences": preferences,
+                "pending_tasks": pending_tasks,
+                "last_updated": datetime.now().isoformat()
+            }
             
         except Exception as e:
-            logger.error(f"Critical error in process_message: {e}")
-            logger.error(f"Full traceback: {traceback.format_exc()}")
-            return "I apologize, but I encountered an unexpected error while processing your message. Please try again with a different message or rephrase your request."
+            logger.error(f"Error getting user context: {e}")
+            return {}
 
 
-# Global orchestrator instance with lazy initialization
+
+
+    def _create_personal_manager_task(self, message: str, context: Dict[str, Any]) -> Task:
+        """Create task for personal manager with full context"""
+        
+        # Format conversation history
+        history_text = ""
+        if context.get("conversation_history"):
+            for exchange in context["conversation_history"]:
+                history_text += f"User: {exchange['message']}\nAssistant: {exchange['response']}\n\n"
+        
+        # Format recent memories
+        memories_text = ""
+        if context.get("recent_memories"):
+            for memory in context["recent_memories"]:
+                memories_text += f"- {memory['text'][:100]}...\n"
+        
+        # Format preferences
+        preferences_text = ""
+        if context.get("preferences"):
+            for pref in context["preferences"]:
+                preferences_text += f"- {pref['text'][:100]}...\n"
+        
+        return Task(
+            description=f"""Have a natural, empathetic conversation with the user while handling any background tasks seamlessly.
+
+USER MESSAGE: {message}
+
+
+USER CONTEXT:
+- Conversation History:
+{history_text if history_text else '  No recent conversation history'}
+
+- Recent Memories:
+{memories_text if memories_text else '  No recent memories'}
+
+- User Preferences:
+{preferences_text if preferences_text else '  No stored preferences'}
+
+INSTRUCTIONS:
+1. Respond naturally and empathetically to the user's message
+2. Adjust your tone based on the detected emotion
+3. Use tools as needed to handle tasks, reminders, or memory operations
+4. Never mention technical details or delegation - just confirm actions naturally
+5. Reference previous conversations and user context when relevant
+6. Maintain a consistent, warm personality throughout
+7. If using tools, integrate the results seamlessly into the conversation
+
+EXAMPLE RESPONSES:
+- For task creation: "Sure, I've added that to your tasks!"
+- For memory storage: "I'll remember that for you."
+- For emotional content: "I understand how you're feeling. [empathetic response]"
+
+Keep your response conversational and focused on the user's needs.""",
+            agent=self.agent,
+            expected_output="A natural, empathetic response that addresses the user's message and handles any background tasks seamlessly"
+        )
+    
+    
+# Global orchestrator instance
 _orchestrator_instance = None
 
-def get_orchestrator() -> CrewOrchestrator:
+def get_orchestrator() -> PersonalManagerOrchestrator:
     """Get singleton orchestrator instance"""
     global _orchestrator_instance
     if _orchestrator_instance is None:
-        _orchestrator_instance = CrewOrchestrator()
+        _orchestrator_instance = PersonalManagerOrchestrator()
     return _orchestrator_instance
 
-async def run_crew(message: str, user_id: str) -> str:
-    """Main entry point for CrewAI processing"""
+async def run_personal_manager(message: str, user_id: str) -> str:
+    """Main entry point for personal manager processing"""
     orchestrator = get_orchestrator()
     return await orchestrator.process_message(message, user_id)
