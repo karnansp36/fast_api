@@ -1,35 +1,42 @@
-# Personal Manager API
+# TaskPilot
 
-A FastAPI service for a conversational personal assistant. It combines CrewAI-based message routing with PostgreSQL-backed memories, tasks, and conversation history, and offers HTTP and WebSocket chat interfaces. Redis and Celery provide background task processing.
+**TaskPilot is an open-source, agent-powered personal task assistant.** Chat with the service to manage reminders and tasks, save useful information, and get context-aware responses. The FastAPI backend routes user messages to CrewAI agents and persists application data in PostgreSQL.
 
-> **Project status:** This repository is an evolving project, not a production-ready service. Review the security and operational notes before deploying it with real users or data.
+> **Status:** Active development. This repository currently provides a FastAPI backend and a basic browser chat page. It is not production-ready: authentication, authorization, a production embedding model, and comprehensive test coverage still need work. Run it locally and do not send sensitive data to an internet-accessible deployment.
+
+## Product direction
+
+TaskPilot is intended to let people describe what they need in natural language and have the appropriate agents carry out supported tasks. The current code includes a personal manager agent, intent extraction, reminder/task handling, memory tools, chat history, HTTP chat, and WebSocket chat. The browser interface is a lightweight starting point for interacting with the API.
+
+The agent should only be described as automating actions that are implemented and configured in the running deployment. Additional integrations and task capabilities are future work.
 
 ## Features
 
-- Conversational responses routed through CrewAI agents and a configurable language model.
-- Persistent memories, reminders/tasks, and conversation history in PostgreSQL.
-- HTTP chat endpoint and real-time WebSocket chat.
-- Redis-backed Celery worker for background tasks.
-- SQLAlchemy models and Alembic migration history.
-- FastAPI interactive API documentation.
+- Browser chat interface served by the FastAPI application.
+- HTTP and WebSocket chat endpoints.
+- CrewAI personal manager agent and message intent routing.
+- PostgreSQL storage models for memories, reminders/tasks, and conversation history.
+- Redis and Celery task processing support.
+- Alembic migration history and FastAPI interactive API docs.
+- Configurable LLM providers in the existing application code (Gemini, OpenAI, or local Ollama).
 
 ## Technology
 
 - Python, FastAPI, and Uvicorn
-- CrewAI and LiteLLM for agent and model orchestration
+- CrewAI and LiteLLM
 - PostgreSQL, SQLAlchemy, Alembic, and pgvector
-- Redis and Celery for background work
+- Redis and Celery
 
 ## Requirements
 
 - Python 3.10 or later
-- PostgreSQL with the [pgvector](https://github.com/pgvector/pgvector) extension installed
-- Redis (used by Celery)
-- An LLM provider: Gemini or OpenAI credentials, or a locally running Ollama service
+- PostgreSQL with the pgvector extension
+- Redis for Celery/background work
+- A configured model provider: Gemini or OpenAI credentials, or a local Ollama installation
 
-## Installation
+## Quick start
 
-### 1. Clone the repository and create a virtual environment
+### 1. Clone and set up Python
 
 ```bash
 git clone https://github.com/karnansp36/fast_api.git
@@ -37,7 +44,7 @@ cd fast_api
 python -m venv .venv
 ```
 
-Activate it:
+Activate the virtual environment:
 
 ```bash
 # macOS / Linux
@@ -47,121 +54,129 @@ source .venv/bin/activate
 .venv\Scripts\Activate.ps1
 ```
 
-### 2. Install Python dependencies
-
-The root `requirements.txt` is the repository's pinned dependency list.
+Install the pinned dependencies:
 
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 3. Configure PostgreSQL and Redis
+### 2. Start PostgreSQL and Redis
 
-Create a PostgreSQL database, install pgvector on the server, and enable the extension in the project database:
+Create a PostgreSQL database and make sure pgvector is installed on its server. Enable the extension in the database:
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
-Start Redis and PostgreSQL using your preferred local setup. This repository does not currently include a Docker Compose file.
+Start PostgreSQL and Redis with your local tools. Docker Compose is not currently included in this repository.
 
-### 4. Configure environment variables
+### 3. Configure the application
 
-Create a `.env` file in the repository root and set values for your environment:
+Copy `.env.example` to `.env` and set database and model-provider values for your local environment. Never commit `.env` or real credentials.
 
-```dotenv
-DATABASE_URL=postgresql+asyncpg://<user>:<password>@localhost:5432/<database>
-REDIS_URL=redis://localhost:6379/0
-CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
-GEMINI_API_KEY=<your-gemini-api-key>
-# Or use an OpenAI key if that is your configured provider:
-OPENAI_API_KEY=<your-openai-api-key>
+```bash
+cp .env.example .env
 ```
 
-Set only the provider credentials you need, and never commit real secrets. The application currently has development fallback values in `app/config.py`; explicitly configure `DATABASE_URL` and review `API_SHARED_SECRET` before running outside a local development environment. The LLM selection logic is in `app/crew/llm_config.py`; Ollama fallback expects a local Ollama service.
+The API uses `DATABASE_URL` for its asynchronous SQLAlchemy connection. The Alembic configuration currently uses a synchronous PostgreSQL URL in `alembic.ini`; set that URL to the same local database before migrating. Do not put production credentials in a tracked file.
 
-### 5. Prepare the database
-
-Alembic migrations are provided. Before running them, update `sqlalchemy.url` in `alembic.ini` to point to your development database (do not put production credentials in a committed file), then run:
+### 4. Apply migrations
 
 ```bash
 alembic upgrade head
 ```
 
-The application also attempts to create tables at startup. For production database changes, use and review migrations rather than relying on automatic schema creation.
+### 5. Run the application
 
-### 6. Run the API and worker
-
-In separate terminals, with the virtual environment activated:
+Start the API in one terminal:
 
 ```bash
-# API
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
+Visit <http://127.0.0.1:8000> to open the chat page, or <http://127.0.0.1:8000/docs> for interactive API documentation.
+
+For background tasks, start a worker in another terminal:
+
 ```bash
-# Celery worker
 celery -A app.celery_worker:celery worker --loglevel=info
 ```
 
-The worker configuration also defines a periodic task. If you need scheduled tasks to run, start Celery Beat separately:
+The Celery application defines a periodic schedule. To run scheduled work, start Celery Beat separately:
 
 ```bash
 celery -A app.celery_worker:celery beat --loglevel=info
 ```
 
-Open <http://127.0.0.1:8000/docs> for interactive API documentation. The root and health routes can be used for a quick check.
+## Configuration
 
-## API overview
+See `.env.example` and `app/config.py`. At minimum, configure a valid `DATABASE_URL` and a model provider. Redis is required when using Celery tasks.
 
-Routes below reflect the `/api/v1` prefix configured in `app.main`:
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection URL for the async application database |
+| `REDIS_URL` | Redis connection URL |
+| `CELERY_BROKER_URL` | Celery broker URL |
+| `CELERY_RESULT_BACKEND` | Celery result backend URL |
+| `GEMINI_API_KEY` | Gemini provider credential, if selected |
+| `OPENAI_API_KEY` | OpenAI provider credential, if selected |
+| `API_SHARED_SECRET` | Reserved configuration; do not assume endpoints are protected by it |
+
+## API
+
+The chat router is mounted under `/api/v1`.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/` | Basic service status |
-| `GET` | `/health` | Health response |
+| `GET` | `/` | Browser chat interface |
+| `GET` | `/health` | Basic service health response |
 | `GET` | `/api/v1/health` | Chat router health response |
-| `GET` | `/api/v1/chat/{user_id}?message=...` | Send a chat message over HTTP |
+| `GET` | `/api/v1/chat/{user_id}?message=...` | Send a message over HTTP |
 | WebSocket | `/api/v1/ws/chat/{user_id}` | Real-time chat connection |
 
 Example HTTP request:
 
 ```bash
 curl --get 'http://127.0.0.1:8000/api/v1/chat/demo-user' \
-  --data-urlencode 'message=Hello'
+  --data-urlencode 'message=Remind me to review my notes tomorrow at 9 AM'
 ```
 
-The WebSocket accepts a plain-text message or JSON containing a `message` field. See the interactive docs and `app/api/websocket_routes.py` for response shapes and current behavior.
+The HTTP chat endpoint waits for the agent response. For the WebSocket protocol and response fields, refer to `app/api/websocket_routes.py`.
 
-## Repository layout
+## Project structure
 
 ```text
 app/
-  api/          HTTP and WebSocket routes
+  api/          HTTP and WebSocket endpoints
   core/         database setup and SQLAlchemy models
-  crew/         agents, LLM configuration, and orchestration
+  crew/         agent definitions, LLM configuration, orchestration
   services/     memory, embeddings, and reminder operations
   tools/        agent tools for memory, reminders, and delegation
-  main.py       FastAPI application and lifecycle
-  celery_worker.py  Celery application and task definitions
+  web/          browser chat interface
+  config.py     environment-based application settings
+  main.py       FastAPI application entry point
+  celery_worker.py  Celery tasks and schedule
 migrations/     Alembic environment and schema revisions
-requirements.txt  Pinned Python dependencies
+requirements.txt  pinned runtime dependencies
+.env.example   local configuration template (no real secrets)
+CONTRIBUTING.md contribution workflow and development expectations
+LICENSE        MIT license
 ```
 
-## Development notes and known limitations
+## Development and contribution
 
-- The embedding function in `app/services/embeddings.py` is hash-based placeholder logic, not a semantic embedding model. Do not treat vector search results as production-quality semantic retrieval without replacing it.
-- `app/main.py` configures permissive CORS and includes development-oriented startup behavior. Add appropriate authentication, authorization, CORS restrictions, secret management, and deployment settings before exposing the service publicly.
-- The checked-in `alembic.ini` includes a database URL. Replace it for local development and avoid storing credentials in source control.
-- The root requirements file is a large pinned environment snapshot. Consider maintaining a smaller direct-dependency manifest and a tested lock file as the project matures.
-- Tests and automated CI are not currently documented in this repository. Verify the service and its external integrations in your own environment.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Issues and PRs should be focused, explain the user impact, and include validation steps. Never include API keys, database passwords, personal data, or `.env` contents in commits or issue reports.
 
-## Contributing
+## Known limitations and security
 
-Contributions are welcome. For changes, please open an issue to discuss substantial work, use a focused pull request, and include relevant tests or reproducible validation steps. Never include API keys, database credentials, or personal data in commits or issue reports.
+- The browser chat currently uses an automatically generated local demo user ID; there is no user authentication or authorization. Do not expose it publicly with real user data.
+- The API currently uses broad CORS settings. Restrict allowed origins and add appropriate authentication and authorization before deployment.
+- `app/services/embeddings.py` currently generates hash-based placeholder vectors, not semantic embeddings. Similarity retrieval is not production-grade until a real embedding model is integrated.
+- Some agent tools and service methods are under development; verify each task flow before relying on it.
+- Use Alembic migrations for schema changes. The app should not be treated as a substitute for reviewed production migrations.
+- The repository does not yet include a comprehensive automated test suite or CI workflow. Add tests for behavior and integrations when contributing.
 
 ## License
 
-This project is distributed under the MIT License. See [LICENSE](LICENSE) for details.
+TaskPilot is released under the MIT License. See [LICENSE](LICENSE).

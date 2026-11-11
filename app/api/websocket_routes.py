@@ -1,32 +1,19 @@
-# Utility function to push a message to a user via websocket (for reminders, etc.)
-async def push_message_to_user(user_id: str, message: str):
-    """
-    Push a message to the user's websocket chat, if connected.
-    """
-    if user_id in manager.message_queues:
-        await manager.message_queues[user_id].put({
-            "reply": message,
-            "user_id": user_id,
-            "status": "reminder"
-        })
-        return True
-    else:
-        # Optionally, store for later delivery or log
-        logger.warning(f"User {user_id} not connected. Could not deliver reminder: {message}")
-        return False
-# api/websocket_routes.py
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.crew.orchestrator import run_personal_manager as run_crew
-import json
-from typing import Dict
+from fastapi.responses import FileResponse
+from pathlib import Path
 import asyncio
+import json
 import logging
 import time
 import traceback
+from typing import Dict
+
+from app.crew.orchestrator import run_personal_manager as run_crew
 
 logger = logging.getLogger(__name__)
-
 router = APIRouter()
+WEB_DIR = Path(__file__).resolve().parents[1] / "web"
+
 
 class ConnectionManager:
     def __init__(self):
@@ -39,173 +26,150 @@ class ConnectionManager:
         await websocket.accept()
         self.active_connections[user_id] = websocket
         self.message_queues[user_id] = asyncio.Queue()
-        # Start dispatcher for this user
-        self.dispatchers[user_id] = asyncio.create_task(
-            self.dispatch_messages(user_id)
-        )
+        self.dispatchers[user_id] = asyncio.create_task(self.dispatch_messages(user_id))
 
     def disconnect(self, user_id: str):
-        if user_id in self.active_connections:
-            del self.active_connections[user_id]
-        if user_id in self.processing_tasks:
-            self.processing_tasks[user_id].cancel()
-            del self.processing_tasks[user_id]
-        if user_id in self.dispatchers:
-            self.dispatchers[user_id].cancel()
-            del self.dispatchers[user_id]
-        if user_id in self.message_queues:
-            del self.message_queues[user_id]
+        self.active_connections.pop(user_id, None)
+        task = self.processing_tasks.pop(user_id, None)
+        if task:
+            task.cancel()
+        dispatcher = self.dispatchers.pop(user_id, None)
+        if dispatcher:
+            dispatcher.cancel()
+        self.message_queues.pop(user_id, None)
 
     async def dispatch_messages(self, user_id: str):
-        """Continuously send messages from the queue in order"""
         try:
             websocket = self.active_connections[user_id]
             queue = self.message_queues[user_id]
-
             while True:
                 message = await queue.get()
                 await websocket.send_json(message)
                 queue.task_done()
-
-        except Exception as e:
-            logger.error(f"Dispatcher stopped for user {user_id}: {str(e)}")
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("WebSocket dispatcher stopped for user %s", user_id)
             self.disconnect(user_id)
 
 
 manager = ConnectionManager()
 
-async def process_message_with_timeout(websocket, user_id, message, start_time):
-    """Process message with proper timeout handling"""
+
+async def push_message_to_user(user_id: str, message: str):
+    """Queue a message for a connected user; return False if they are offline."""
+    queue = manager.message_queues.get(user_id)
+    if queue is None:
+        logger.warning("User %s is not connected; reminder was not delivered", user_id)
+        return False
+    await queue.put({"reply": message, "user_id": user_id, "status": "reminder"})
+    return True
+
+
+async def process_message_with_timeout(user_id: str, message: str, start_time: float):
     try:
         result = await asyncio.wait_for(run_crew(message, user_id), timeout=180.0)
-        end_time = time.time()
-        processing_time = end_time - start_time
-
-        logger.info(f"Request completed in {processing_time:.2f} seconds for user {user_id}")
-
-        if user_id in manager.message_queues:
-            await manager.message_queues[user_id].put({
+        queue = manager.message_queues.get(user_id)
+        if queue:
+            await queue.put({
                 "reply": result,
                 "user_id": user_id,
                 "status": "success",
-                "processing_time": processing_time
+                "processing_time": time.time() - start_time,
             })
-
-        return True
-
     except asyncio.TimeoutError:
-        end_time = time.time()
-        processing_time = end_time - start_time
-        logger.error(f"Request timeout after {processing_time:.2f} seconds for user {user_id}")
-
-        if user_id in manager.message_queues:
-            await manager.message_queues[user_id].put({
-                "reply": "I apologize, but the request took too long to process. Please try again with a more specific request.",
+        queue = manager.message_queues.get(user_id)
+        if queue:
+            await queue.put({
+                "reply": "The request took too long to process. Please try again.",
                 "user_id": user_id,
                 "status": "timeout",
-                "processing_time": processing_time
+                "processing_time": time.time() - start_time,
             })
-
-        return False
-
-    except Exception as e:
-        end_time = time.time()
-        processing_time = end_time - start_time
-        logger.error(f"Error processing message for user {user_id}: {str(e)}")
-        logger.error(f"Full traceback: {traceback.format_exc()}")
-
-        if user_id in manager.message_queues:
-            await manager.message_queues[user_id].put({
-                "reply": f"Sorry, I encountered an error: {str(e)}",
+    except asyncio.CancelledError:
+        raise
+    except Exception:
+        logger.exception("Error processing chat message for user %s", user_id)
+        queue = manager.message_queues.get(user_id)
+        if queue:
+            await queue.put({
+                "reply": "Sorry, I could not process that message. Please try again.",
                 "user_id": user_id,
                 "status": "error",
-                "processing_time": processing_time
+                "processing_time": time.time() - start_time,
             })
 
-        return False
+
+@router.get("/ui", include_in_schema=False)
+async def chat_ui():
+    return FileResponse(WEB_DIR / "chat.html")
+
 
 @router.websocket("/ws/chat/{user_id}")
 async def chat_socket(websocket: WebSocket, user_id: str):
     await manager.connect(websocket, user_id)
-
     try:
-        # Initial ping
         await websocket.send_json({"type": "ping", "timestamp": time.time()})
-
         while True:
+            data = await asyncio.wait_for(websocket.receive_text(), timeout=300.0)
+            start_time = time.time()
             try:
-                data = await asyncio.wait_for(websocket.receive_text(), timeout=300.0)
-                start_time = time.time()
-
-                try:
-                    message_data = json.loads(data)
-                    message = message_data.get("message", data)
-                except json.JSONDecodeError:
-                    message = data
-
-                # Acknowledge immediately
-                await websocket.send_json({
-                    "status": "processing",
-                    "message": "Request received, processing...",
-                    "timestamp": start_time
-                })
-
-                # Fire async task (not awaited)
-                processing_task = asyncio.create_task(
-                    process_message_with_timeout(websocket, user_id, message, start_time)
-                )
-                manager.processing_tasks[user_id] = processing_task
-
-            except asyncio.TimeoutError:
-                try:
-                    await websocket.send_json({"type": "ping", "timestamp": time.time()})
-                    logger.debug(f"Sent ping to user {user_id}")
-                except Exception as e:
-                    logger.error(f"Failed to send ping to user {user_id}: {str(e)}")
-                    break
-
+                message_data = json.loads(data)
+                message = message_data.get("message", data)
+            except (json.JSONDecodeError, AttributeError):
+                message = data
+            if not isinstance(message, str) or not message.strip():
+                await websocket.send_json({"status": "error", "message": "Message cannot be empty."})
+                continue
+            await websocket.send_json({"status": "processing", "message": "Request received."})
+            previous = manager.processing_tasks.get(user_id)
+            if previous and not previous.done():
+                previous.cancel()
+            manager.processing_tasks[user_id] = asyncio.create_task(
+                process_message_with_timeout(user_id, message.strip(), start_time)
+            )
+    except asyncio.TimeoutError:
+        try:
+            await websocket.send_json({"type": "ping", "timestamp": time.time()})
+        except Exception:
+            manager.disconnect(user_id)
     except WebSocketDisconnect:
-        logger.info(f"WebSocket disconnected for user {user_id}")
         manager.disconnect(user_id)
-    except Exception as e:
-        logger.error(f"Unexpected error in WebSocket connection for user {user_id}: {str(e)}")
+    except Exception:
+        logger.exception("Unexpected WebSocket error for user %s", user_id)
         manager.disconnect(user_id)
+
 
 @router.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "Personal Manager with CrewAI"}
+    return {"status": "healthy", "service": "TaskPilot"}
+
 
 @router.get("/chat/{user_id}")
 async def chat_http(user_id: str, message: str):
-    """HTTP endpoint for testing"""
+    if not message.strip():
+        return {"reply": "Message cannot be empty.", "user_id": user_id, "status": "error"}
     start_time = time.time()
     try:
-        # Set timeout for HTTP requests as well
-        result = await asyncio.wait_for(run_crew(message, user_id), timeout=120.0)
-        end_time = time.time()
-        processing_time = end_time - start_time
-        
+        result = await asyncio.wait_for(run_crew(message.strip(), user_id), timeout=120.0)
         return {
-            "reply": result, 
-            "user_id": user_id, 
+            "reply": result,
+            "user_id": user_id,
             "status": "success",
-            "processing_time": processing_time
+            "processing_time": time.time() - start_time,
         }
     except asyncio.TimeoutError:
-        end_time = time.time()
-        processing_time = end_time - start_time
         return {
-            "reply": "I apologize, but the request took too long to process. Please try again with a more specific request.", 
-            "user_id": user_id, 
+            "reply": "The request took too long to process. Please try again.",
+            "user_id": user_id,
             "status": "timeout",
-            "processing_time": processing_time
+            "processing_time": time.time() - start_time,
         }
-    except Exception as e:
-        end_time = time.time()
-        processing_time = end_time - start_time
+    except Exception:
+        logger.exception("Error processing HTTP chat request for user %s", user_id)
         return {
-            "reply": f"Error: {str(e)}", 
-            "user_id": user_id, 
+            "reply": "Sorry, I could not process that message. Please try again.",
+            "user_id": user_id,
             "status": "error",
-            "processing_time": processing_time
+            "processing_time": time.time() - start_time,
         }

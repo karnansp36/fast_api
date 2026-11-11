@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>TaskPilot — your AI task assistant</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; background: #f3f5f9; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .shell { width: min(100%, 860px); height: min(780px, calc(100vh - 48px)); min-height: 520px; display: flex; flex-direction: column; overflow: hidden; background: white; border: 1px solid #e3e7ef; border-radius: 20px; box-shadow: 0 24px 70px #1e293b14; }
+    header { display: flex; align-items: center; gap: 14px; padding: 20px 24px; color: white; background: #101827; }
+    .mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; background: #4263eb; font-size: 22px; }
+    h1 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    header p { margin: 4px 0 0; color: #c4cada; font-size: 13px; }
+    #messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 24px; }
+    .welcome { margin: auto; max-width: 440px; text-align: center; color: #667085; line-height: 1.6; }
+    .welcome strong { display: block; margin-bottom: 8px; color: #172033; font-size: 21px; }
+    .message { max-width: min(78%, 590px); padding: 12px 15px; border-radius: 16px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+    .user { align-self: flex-end; color: white; background: #4263eb; border-bottom-right-radius: 5px; }
+    .assistant { align-self: flex-start; background: #f0f2f7; border-bottom-left-radius: 5px; }
+    .notice { padding: 0 24px 10px; color: #667085; font-size: 12px; }
+    form { display: flex; gap: 10px; padding: 16px 20px 20px; border-top: 1px solid #edf0f5; }
+    input { flex: 1; min-width: 0; padding: 13px 15px; border: 1px solid #d5dae5; border-radius: 12px; font: inherit; outline: none; }
+    input:focus { border-color: #4263eb; box-shadow: 0 0 0 3px #4263eb20; }
+    button { padding: 0 20px; border: 0; border-radius: 12px; color: white; background: #4263eb; font: inherit; font-weight: 650; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    @media (max-width: 560px) { body { padding: 0; } .shell { height: 100vh; min-height: 0; border: 0; border-radius: 0; } header { padding: 16px; } #messages { padding: 18px 14px; } .message { max-width: 90%; } form { padding: 12px; } }
+  </style>
+</head>
+<body>
+  <main class="shell" aria-label="TaskPilot chat">
+    <header>
+      <div class="mark" aria-hidden="true">✦</div>
+      <div><h1>TaskPilot</h1><p>Your conversational task assistant</p></div>
+    </header>
+    <section id="messages" aria-live="polite" aria-label="Conversation">
+      <div class="welcome" id="welcome"><strong>What can I help you take care of?</strong>Ask a question, save something to remember, or describe a reminder in plain language.</div>
+    </section>
+    <div class="notice">Local development interface. Do not share sensitive information.</div>
+    <form id="chat-form">
+      <input id="message-input" name="message" placeholder="Message TaskPilot…" autocomplete="off" required aria-label="Your message">
+      <button id="send-button" type="submit">Send</button>
+    </form>
+  </main>
+  <script>
+    const messages = document.querySelector('#messages');
+    const form = document.querySelector('#chat-form');
+    const input = document.querySelector('#message-input');
+    const button = document.querySelector('#send-button');
+    const storageKey = 'taskpilot-demo-user-id';
+    let userId = localStorage.getItem(storageKey);
+    if (!userId) {
+      userId = globalThis.crypto?.randomUUID?.() || `demo-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      localStorage.setItem(storageKey, userId);
+    }
+    function addMessage(text, role) {
+      document.querySelector('#welcome')?.remove();
+      const item = document.createElement('div');
+      item.className = `message ${role}`;
+      item.textContent = text;
+      messages.append(item);
+      messages.scrollTop = messages.scrollHeight;
+      return item;
+    }
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if (!text || button.disabled) return;
+      addMessage(text, 'user');
+      input.value = '';
+      button.disabled = true;
+      const pending = addMessage('Working on it…', 'assistant');
+      try {
+        const url = new URL(`/api/v1/chat/${encodeURIComponent(userId)}`, location.origin);
+        url.searchParams.set('message', text);
+        const response = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`Request failed (${response.status})`);
+        const data = await response.json();
+        pending.textContent = data.reply || 'The assistant returned an empty response.';
+      } catch (error) {
+        pending.textContent = `Unable to reach TaskPilot. Check that the API and its dependencies are running. ${error.message}`;
+      } finally {
+        button.disabled = false;
+        input.focus();
+        messages.scrollTop = messages.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>
