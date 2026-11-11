@@ -1,184 +1,167 @@
-# 🤖 Personal Manager AI Microservice
+# Personal Manager API
 
-A **Personal Assistant Microservice** built with **FastAPI**, **CrewAI**, **PostgreSQL (`pgvector`)**, **Redis**, and **Celery**.  
-This service acts as a personal manager capable of **empathetic conversations**, **task scheduling**, and **memory management**.  
+A FastAPI service for a conversational personal assistant. It combines CrewAI-based message routing with PostgreSQL-backed memories, tasks, and conversation history, and offers HTTP and WebSocket chat interfaces. Redis and Celery provide background task processing.
 
----
+> **Project status:** This repository is an evolving project, not a production-ready service. Review the security and operational notes before deploying it with real users or data.
 
-## ✨ Features
+## Features
 
-### ✅ Implemented
-- **Empathetic Conversation**
-  - Natural, human-like interactions powered by CrewAI agents.  
-- **Memory Management**
-  - **Store Memories:** “Remember my preference for coffee.”  
-  - **Search Memories:** Retrieve relevant info for contextual replies.  
-- **Task / Reminder Management**
-  - **Create Reminders:** “Remind me to call mom tomorrow at 10 AM.”  
-  - **Get Reminders:** Fetch pending tasks and reminders.  
-- **Asynchronous Task Delegation**
-  - Long-running tasks handled in the background with **Celery**.  
-- **Conversation History**
-  - All messages stored for continuity.  
-- **Configurable LLMs**
-  - Works with **Gemini**, **OpenAI**, and **Ollama** via environment config.  
-- **WebSocket API**
-  - Real-time chat interface for interactive conversations.  
-- **Robust Error Handling**
-  - Global exception handling for API and WebSocket.  
-- **Database Initialization**
-  - Auto-creates and validates database schema at startup.  
+- Conversational responses routed through CrewAI agents and a configurable language model.
+- Persistent memories, reminders/tasks, and conversation history in PostgreSQL.
+- HTTP chat endpoint and real-time WebSocket chat.
+- Redis-backed Celery worker for background tasks.
+- SQLAlchemy models and Alembic migration history.
+- FastAPI interactive API documentation.
 
-### 🚀 Planned / Projected
-- **Emotion Service Integration** (for detecting user emotions).  
-- **More Specialized Agents** (beyond the Personal Manager).  
-- **Advanced RAG** (with `pgvector` for smarter context retrieval).  
-- **User Preferences** (dedicated preference management system).  
+## Technology
 
----
+- Python, FastAPI, and Uvicorn
+- CrewAI and LiteLLM for agent and model orchestration
+- PostgreSQL, SQLAlchemy, Alembic, and pgvector
+- Redis and Celery for background work
 
-## 🏗️ Architecture
+## Requirements
 
-The system follows a **microservice architecture** built around FastAPI.
+- Python 3.10 or later
+- PostgreSQL with the [pgvector](https://github.com/pgvector/pgvector) extension installed
+- Redis (used by Celery)
+- An LLM provider: Gemini or OpenAI credentials, or a locally running Ollama service
 
-- **FastAPI App (`main.py`)**
-  - Routes, middleware, DB lifecycle, error handling.  
-- **Database (PostgreSQL + `pgvector`)**
-  - Stores **memories**, **tasks**, and **conversation history**.  
-- **Redis**
-  - Message broker + Celery result backend.  
-- **Celery**
-  - Handles background jobs (e.g., reminder creation).  
-- **CrewAI**
-  - Orchestrates AI agents.  
-  - **Orchestrator (`orchestrator.py`)**: Handles user input → intent detection → agent execution.  
-  - **Personal Manager Agent**: Empathetic AI agent with task/memory tools.  
-- **Services (`app/services/`)**
-  - `memory_service.py` → memory CRUD.  
-  - `reminders.py` → task/reminder management.  
-  - `embeddings.py` → text embeddings (placeholder).  
-- **Tools (`app/tools/`)**
-  - Memory tools: `StoreMemoryTool`, `SearchMemoryTool`.  
-  - Reminder tools: `CreateReminderTool`, `GetRemindersTool`.  
-  - Delegation: `AsyncDelegationTool`.  
-- **API Endpoints**
-  - WebSocket: `ws/chat/{user_id}`  
-  - HTTP: `/chat/{user_id}` (basic testing).  
+## Installation
 
----
+### 1. Clone the repository and create a virtual environment
 
-## 🗄️ Data Models
+```bash
+git clone https://github.com/karnansp36/fast_api.git
+cd fast_api
+python -m venv .venv
+```
 
-### `Memory`
-| Field       | Type       | Description |
-|-------------|------------|-------------|
-| id          | UUID       | Primary key |
-| user_id     | String     | User identifier |
-| text        | Text       | Content of memory |
-| memory_type | String     | e.g. general, preference, episodic |
-| meta_data   | JSON       | Extra info |
-| embedding   | Vector     | `pgvector` embedding |
-| created_at  | Timestamp  | Creation time |
+Activate it:
 
-### `Task`
-| Field      | Type       | Description |
-|------------|------------|-------------|
-| id         | UUID       | Primary key |
-| user_id    | String     | User identifier |
-| text       | Text       | Task description |
-| due_time   | DateTime   | Optional deadline |
-| status     | String     | pending / completed |
-| created_at | Timestamp  | Created at |
-| updated_at | Timestamp  | Last update |
+```bash
+# macOS / Linux
+source .venv/bin/activate
 
-### `ConversationHistory`
-| Field      | Type       | Description |
-|------------|------------|-------------|
-| id         | UUID       | Primary key |
-| user_id    | String     | User identifier |
-| message    | Text       | User’s input |
-| response   | Text       | AI response |
-| emotion    | String     | Detected emotion (future) |
-| created_at | Timestamp  | Interaction time |
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
 
----
+### 2. Install Python dependencies
 
-## ⚙️ Configuration
+The root `requirements.txt` is the repository's pinned dependency list.
 
-Environment variables are managed via `.env` and `pydantic_settings`.
-
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `REDIS_URL` | Redis connection string |
-| `CELERY_BROKER_URL` | Celery broker |
-| `CELERY_RESULT_BACKEND` | Celery result backend |
-| `GEMINI_API_KEY` | API key for Gemini |
-| `OPENAI_API_KEY` | API key for OpenAI |
-| `OLLAMA_HOST`, `OLLAMA_MODEL` | Ollama settings |
-| `EMBEDDING_DIMENSIONS` | Vector embedding size |
-| `SHORT_MEMORY_MAXLEN` | Max conversation memory length |
-| `RAG_TOP_K` | Retrieval chunk size |
-| Feature flags | `ENABLE_WEBSOCKETS`, `ENABLE_MEMORY_STORAGE`, `ENABLE_AGENT_ROUTING` |
-
----
-
-## 🧠 AI Orchestration
-
-- **PersonalManagerOrchestrator**
-  - Routes messages.  
-  - Detects intents (memory, reminder, conversation).  
-  - Gathers context (conversation, memories, preferences, pending tasks).  
-  - Creates CrewAI task → delegates to **Personal Manager Agent**.  
-
-- **Personal Manager Agent**
-  - **Role:** Personal Manager & Assistant.  
-  - **Goal:** Empathetic, context-aware interaction.  
-  - **Backstory:** Warm, human-like personality.  
-  - **Tools:** `StoreMemoryTool`, `SearchMemoryTool`, `CreateReminderTool`, `GetRemindersTool`, `AsyncDelegationTool`.  
-
----
-
-## 🔌 API Endpoints
-
-### WebSocket
-- `GET /ws/chat/{user_id}` → Real-time chat.  
-
-### HTTP
-- `/` → API status.  
-- `/health` → Health check.  
-- `/api/v1/health` → Health check.  
-- `/api/v1/chat/{user_id}?message=...` → Test chat via HTTP.  
-
----
-
-## 🚀 Setup & Run
-
-1. **Clone repo**  
-   ```bash
-   git clone <repo-url>
-   cd personal-manager-ai
-
-
-Install dependencies
-
+```bash
+python -m pip install --upgrade pip
 pip install -r requirements.txt
+```
 
+### 3. Configure PostgreSQL and Redis
 
-Set environment variables in .env.
+Create a PostgreSQL database, install pgvector on the server, and enable the extension in the project database:
 
-Run Postgres & Redis (Docker recommended).
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
 
-Start Celery worker
+Start Redis and PostgreSQL using your preferred local setup. This repository does not currently include a Docker Compose file.
 
-celery -A app.celery_worker worker --loglevel=info
+### 4. Configure environment variables
 
+Create a `.env` file in the repository root and set values for your environment:
 
-Run FastAPI app
+```dotenv
+DATABASE_URL=postgresql+asyncpg://<user>:<password>@localhost:5432/<database>
+REDIS_URL=redis://localhost:6379/0
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+GEMINI_API_KEY=<your-gemini-api-key>
+# Or use an OpenAI key if that is your configured provider:
+OPENAI_API_KEY=<your-openai-api-key>
+```
 
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+Set only the provider credentials you need, and never commit real secrets. The application currently has development fallback values in `app/config.py`; explicitly configure `DATABASE_URL` and review `API_SHARED_SECRET` before running outside a local development environment. The LLM selection logic is in `app/crew/llm_config.py`; Ollama fallback expects a local Ollama service.
 
-⚠️ Note on Emotion Service
+### 5. Prepare the database
 
-main.py references app/services/emotion_service.py, but the file is missing.
-This likely indicates planned emotion detection functionality that is not yet implemented.
+Alembic migrations are provided. Before running them, update `sqlalchemy.url` in `alembic.ini` to point to your development database (do not put production credentials in a committed file), then run:
+
+```bash
+alembic upgrade head
+```
+
+The application also attempts to create tables at startup. For production database changes, use and review migrations rather than relying on automatic schema creation.
+
+### 6. Run the API and worker
+
+In separate terminals, with the virtual environment activated:
+
+```bash
+# API
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+```bash
+# Celery worker
+celery -A app.celery_worker:celery worker --loglevel=info
+```
+
+The worker configuration also defines a periodic task. If you need scheduled tasks to run, start Celery Beat separately:
+
+```bash
+celery -A app.celery_worker:celery beat --loglevel=info
+```
+
+Open <http://127.0.0.1:8000/docs> for interactive API documentation. The root and health routes can be used for a quick check.
+
+## API overview
+
+Routes below reflect the `/api/v1` prefix configured in `app.main`:
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/` | Basic service status |
+| `GET` | `/health` | Health response |
+| `GET` | `/api/v1/health` | Chat router health response |
+| `GET` | `/api/v1/chat/{user_id}?message=...` | Send a chat message over HTTP |
+| WebSocket | `/api/v1/ws/chat/{user_id}` | Real-time chat connection |
+
+Example HTTP request:
+
+```bash
+curl --get 'http://127.0.0.1:8000/api/v1/chat/demo-user' \
+  --data-urlencode 'message=Hello'
+```
+
+The WebSocket accepts a plain-text message or JSON containing a `message` field. See the interactive docs and `app/api/websocket_routes.py` for response shapes and current behavior.
+
+## Repository layout
+
+```text
+app/
+  api/          HTTP and WebSocket routes
+  core/         database setup and SQLAlchemy models
+  crew/         agents, LLM configuration, and orchestration
+  services/     memory, embeddings, and reminder operations
+  tools/        agent tools for memory, reminders, and delegation
+  main.py       FastAPI application and lifecycle
+  celery_worker.py  Celery application and task definitions
+migrations/     Alembic environment and schema revisions
+requirements.txt  Pinned Python dependencies
+```
+
+## Development notes and known limitations
+
+- The embedding function in `app/services/embeddings.py` is hash-based placeholder logic, not a semantic embedding model. Do not treat vector search results as production-quality semantic retrieval without replacing it.
+- `app/main.py` configures permissive CORS and includes development-oriented startup behavior. Add appropriate authentication, authorization, CORS restrictions, secret management, and deployment settings before exposing the service publicly.
+- The checked-in `alembic.ini` includes a database URL. Replace it for local development and avoid storing credentials in source control.
+- The root requirements file is a large pinned environment snapshot. Consider maintaining a smaller direct-dependency manifest and a tested lock file as the project matures.
+- Tests and automated CI are not currently documented in this repository. Verify the service and its external integrations in your own environment.
+
+## Contributing
+
+Contributions are welcome. For changes, please open an issue to discuss substantial work, use a focused pull request, and include relevant tests or reproducible validation steps. Never include API keys, database credentials, or personal data in commits or issue reports.
+
+## License
+
+This project is distributed under the MIT License. See [LICENSE](LICENSE) for details.
